@@ -3,6 +3,8 @@ import 'package:flappy_search_bar/flappy_search_bar.dart';
 import 'package:flappy_search_bar/search_bar_style.dart';
 import 'package:flutter/material.dart';
 
+import 'colors.dart';
+
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -64,40 +66,6 @@ class CustomSearchBar extends StatelessWidget {
     );
   }
 }
-/*child: Container(
-            height: 80,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Flexible(
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 200),
-                    width: _animate ? widthMax * .8 : widthMax,
-                    decoration: BoxDecoration(
-                      borderRadius: widget.searchBarStyle.borderRadius,
-                      color: widget.searchBarStyle.backgroundColor,
-                    ),
-                    child: Padding(
-                      padding: widget.searchBarStyle.padding,
-                      child: Theme(
-                        child: TextField(
-                          controller: _searchQueryController,
-                          onChanged: _onTextChanged,
-                          style: widget.textStyle,
-                          decoration: InputDecoration(
-                            icon: widget.icon,
-                            border: InputBorder.none,
-                            hintText: widget.hintText,
-                            hintStyle: widget.hintStyle,
-                          ),
-                        ),
-                        data: Theme.of(context).copyWith(
-                          primaryColor: widget.iconActiveColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),*/
 
 class ItemList extends StatelessWidget {
   @override
@@ -155,31 +123,18 @@ class YearPill extends StatelessWidget {
   }
 }
 
-enum ItemColor { normal, yellow, orange, red }
-
 class ListItem extends StatelessWidget {
-  final List<Color> bgColors = const [
-    Color(0xffF2F2F2),
-    Color(0xffF3E37C),
-    Color(0xffF2994A),
-    Color(0xffEF6F6C)
-  ];
-  final List<Color> fontColors = const [
-    Colors.black,
-    Colors.black,
-    Colors.white,
-    Colors.white
-  ];
+
   final ItemColor color;
   final bool boldYear;
 
   const ListItem(
-      {Key key, this.color = ItemColor.normal, this.boldYear = false})
+      {Key key, this.color = ItemColor.grey, this.boldYear = false})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor = bgColors[color.index];
+    Color bgColor = bgColors[color];
     Color fontColor = fontColors[color.index];
     Widget pill;
     if (fontColor == Colors.white) {
