@@ -2,7 +2,7 @@ import 'package:FoodWatch/colors.dart';
 import 'package:FoodWatch/page_template.dart';
 import 'package:flutter/material.dart';
 
-const _paddding = EdgeInsets.all(16);
+const _padding = EdgeInsets.all(16);
 const _itemDecoration = BoxDecoration(
     borderRadius: BorderRadius.only(
       topLeft: Radius.circular(0.0),
@@ -32,7 +32,7 @@ class DetailPage extends StatelessWidget {
                   style: TextStyle(fontSize: 40, color: fontColors[color]))
             ]),
             Container(
-              padding: _paddding,
+              padding: _padding,
               decoration: _itemDecoration,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -51,7 +51,7 @@ class DetailPage extends StatelessWidget {
               height: 16,
             ),
             Container(
-                padding: _paddding,
+                padding: _padding,
                 decoration: _itemDecoration,
                 alignment: AlignmentDirectional(0.0, 0.0),
                 child: Text(
@@ -62,7 +62,7 @@ class DetailPage extends StatelessWidget {
               color: Colors.transparent,
               height: 16,
             ),
-      SizedBox(child: PhotoButton(onPressed: ()=>{}), width: double.infinity,)
+            PhotoButton(onPressed: () => {})
           ],
         ),
       ),

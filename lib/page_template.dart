@@ -62,7 +62,7 @@ class PhotoButton extends StatelessWidget {
     Color bgColor =   Color(0xff92AAFF);
     Color textColor = Colors.white;
 
-    return FlatButton(
+    return SizedBox(child: FlatButton(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25.0),
       ),
@@ -76,7 +76,7 @@ class PhotoButton extends StatelessWidget {
               fontSize: 28,
               fontFamily: "Roboto",
               fontWeight: FontWeight.w300)),
-    );
+    ), width: double.infinity);
   }
 
 }

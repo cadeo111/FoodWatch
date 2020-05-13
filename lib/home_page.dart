@@ -1,6 +1,4 @@
 import 'package:FoodWatch/page_template.dart';
-import 'package:flappy_search_bar/flappy_search_bar.dart';
-import 'package:flappy_search_bar/search_bar_style.dart';
 import 'package:flutter/material.dart';
 
 import 'colors.dart';
@@ -62,6 +60,7 @@ class CustomSearchBar extends StatelessWidget {
           hintStyle: const TextStyle(color: Color.fromRGBO(142, 142, 147, 1)),
         ),
         style: TextStyle(fontSize: 35, fontWeight: FontWeight.w300),
+
       ),
     );
   }
