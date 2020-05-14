@@ -3,15 +3,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class PageTemplate extends StatelessWidget {
-  final List<PageButton> buttons;
+  final List<Widget> buttons;
   final Widget child;
   final ItemColor color;
 
-  const PageTemplate(
-      {Key key,
-      @required this.buttons,
-      @required this.child,
-      this.color = ItemColor.white})
+  const PageTemplate({Key key,
+    @required this.buttons,
+    @required this.child,
+    this.color = ItemColor.white})
       : super(key: key);
 
   @override
@@ -36,7 +35,7 @@ class PageTemplate extends StatelessWidget {
                       )
                     ],
                     borderRadius:
-                        BorderRadius.vertical(bottom: Radius.circular(25.0)),
+                    BorderRadius.vertical(bottom: Radius.circular(25.0)),
                     color: bgColors[color]),
               )),
           Expanded(
@@ -56,10 +55,11 @@ class PageTemplate extends StatelessWidget {
 class PhotoButton extends StatelessWidget {
   final Function onPressed;
 
-  PhotoButton({Key key, @required this.onPressed}): super(key: key);
+  PhotoButton({Key key, @required this.onPressed}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    Color bgColor =   Color(0xff92AAFF);
+    Color bgColor = Color(0xff92AAFF);
     Color textColor = Colors.white;
 
     return SizedBox(child: FlatButton(
@@ -86,7 +86,8 @@ class PageButton extends StatelessWidget {
   final bool isRed;
   final Function onPressed;
 
-  PageButton(this.text, {Key key, this.isRed = false, @required this.onPressed}): super(key: key);
+  PageButton(this.text, {Key key, this.isRed = false, @required this.onPressed})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +100,7 @@ class PageButton extends StatelessWidget {
       ),
       color: bgColor,
       padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-      onPressed: () => {},
+      onPressed: onPressed,
       child: Text(text,
           style: TextStyle(
               color: textColor,
@@ -108,4 +109,32 @@ class PageButton extends StatelessWidget {
               fontWeight: FontWeight.w300)),
     );
   }
+}
+
+class DummyPageButton extends StatelessWidget {
+  final String text;
+  final bool isRed;
+
+  DummyPageButton(this.text, {Key key, this.isRed = false}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    Color bgColor = Colors.white;
+    Color textColor = (isRed) ? Color(0xffFF8F8C) : Color(0xff92AAFF);
+    return Container(
+      decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(30.0),
+      ),
+      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      child: Text(text,
+          style: TextStyle(
+              color: textColor,
+              fontSize: 28,
+              fontFamily: "Roboto",
+              fontWeight: FontWeight.w300))
+      ,
+    );
+  }
+
 }

@@ -20,13 +20,20 @@ const _fontWeightText = FontWeight.w300;
 const _fontWeightTitles = FontWeight.w500;
 
 class NewItemPage extends StatelessWidget {
+  final Function back;
+
+  const NewItemPage(
+    this.back, {
+    Key key,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: PageTemplate(
           color: ItemColor.grey,
           buttons: [
-            PageButton("Cancel", isRed: true, onPressed: () => {}),
+            PageButton("Cancel", isRed: true, onPressed: () => {back()}),
             PageButton(
               "Save",
               onPressed: () => {},
@@ -40,7 +47,9 @@ class NewItemPage extends StatelessWidget {
               _divider,
               DescriptionInput(),
               _divider,
-              PhotoButton(onPressed: ()=>{},)
+              PhotoButton(
+                onPressed: () => {},
+              )
             ],
           )),
     );
@@ -134,18 +143,19 @@ class ExpirationInput extends StatelessWidget {
         padding: _padding,
         decoration: _itemDecoration,
         child: Padding(
-
-            padding: EdgeInsets.only(bottom:2),
+            padding: EdgeInsets.only(bottom: 2),
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-              Text(
-                "Expiration",
-                style: TextStyle(fontSize: 25, fontWeight: _fontWeightTitles),
-              ),
-              _divider,
-              Text(DateFormat('MMM d, yyyy').format(date),
-                  style: TextStyle(fontSize: 30, fontWeight: _fontWeightText))
-            ])));
+                  Text(
+                    "Expiration",
+                    style:
+                        TextStyle(fontSize: 25, fontWeight: _fontWeightTitles),
+                  ),
+                  _divider,
+                  Text(DateFormat('MMM d, yyyy').format(date),
+                      style:
+                          TextStyle(fontSize: 30, fontWeight: _fontWeightText))
+                ])));
   }
 }

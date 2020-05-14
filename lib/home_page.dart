@@ -1,7 +1,13 @@
+import 'package:FoodWatch/new_item_page.dart';
 import 'package:FoodWatch/page_template.dart';
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
 import 'colors.dart';
+import 'main.dart';
+
+//_newItemButton(BuildContext context) => PageButton("New Item", onPressed: () => {Navigator.of(context).push()});
+_transition(BuildContext context) {}
 
 class HomePage extends StatelessWidget {
   @override
@@ -9,7 +15,26 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       body: PageTemplate(
         buttons: [
-          PageButton("New Item", onPressed: () => {}),
+          OpenContainer(
+              closedColor: Colors.white,
+              openColor: ItemActualColor.grey,
+              closedElevation: 0,
+              openElevation: 15.0,
+              openShape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(30.0)),
+              ),
+              closedShape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(30.0)),
+              ),
+              transitionType: ContainerTransitionType.fade,
+              transitionDuration: const Duration(milliseconds: 700),
+              openBuilder: (context, action) {
+                return NewItemPage(action);
+              },
+              closedBuilder: (context, action) {
+                return DummyPageButton("New Item");
+              })
+
         ],
         child: Stack(
           children: <Widget>[
@@ -60,7 +85,6 @@ class CustomSearchBar extends StatelessWidget {
           hintStyle: const TextStyle(color: Color.fromRGBO(142, 142, 147, 1)),
         ),
         style: TextStyle(fontSize: 35, fontWeight: FontWeight.w300),
-
       ),
     );
   }
@@ -123,12 +147,10 @@ class YearPill extends StatelessWidget {
 }
 
 class ListItem extends StatelessWidget {
-
   final ItemColor color;
   final bool boldYear;
 
-  const ListItem(
-      {Key key, this.color = ItemColor.grey, this.boldYear = false})
+  const ListItem({Key key, this.color = ItemColor.grey, this.boldYear = false})
       : super(key: key);
 
   @override
