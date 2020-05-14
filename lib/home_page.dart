@@ -1,3 +1,4 @@
+import 'package:FoodWatch/detail_page.dart';
 import 'package:FoodWatch/new_item_page.dart';
 import 'package:FoodWatch/page_template.dart';
 import 'package:animations/animations.dart';
@@ -5,9 +6,6 @@ import 'package:flutter/material.dart';
 
 import 'colors.dart';
 import 'main.dart';
-
-//_newItemButton(BuildContext context) => PageButton("New Item", onPressed: () => {Navigator.of(context).push()});
-_transition(BuildContext context) {}
 
 class HomePage extends StatelessWidget {
   @override
@@ -34,7 +32,6 @@ class HomePage extends StatelessWidget {
               closedBuilder: (context, action) {
                 return DummyPageButton("New Item");
               })
-
         ],
         child: Stack(
           children: <Widget>[
@@ -87,13 +84,6 @@ class CustomSearchBar extends StatelessWidget {
         style: TextStyle(fontSize: 35, fontWeight: FontWeight.w300),
       ),
     );
-  }
-}
-
-class ItemList extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
   }
 }
 
@@ -172,30 +162,47 @@ class ListItem extends StatelessWidget {
       }
     }
 
-    return Container(
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(25.0)),
-            color: bgColor),
-        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16),
-        child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text(
-                "Milk",
-                style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.w300,
-                    color: fontColor),
-              ),
-              Text("Aug 24",
-                  style: TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.w200,
-                      color: fontColor)),
-              pill
-            ]));
-//    return ListTile(
-//        leading: Text("Milk"), title: Text("Aug 24"), trailing: Text("2020"));
+    return OpenContainer(
+      closedElevation: 0,
+      openElevation: 15.0,
+      openColor: bgColor,
+      closedColor: bgColor,
+      openShape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(30.0)),
+      ),
+      closedShape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(30.0)),
+      ),
+      transitionDuration: const Duration(milliseconds: 700),
+      transitionType: ContainerTransitionType.fade,
+      closedBuilder: (BuildContext context, void Function() action) {
+        return Container(
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                color: bgColor),
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16),
+            child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    "Milk",
+                    style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w300,
+                        color: fontColor),
+                  ),
+                  Text("Aug 24",
+                      style: TextStyle(
+                          fontSize: 36,
+                          fontWeight: FontWeight.w200,
+                          color: fontColor)),
+                  pill
+                ]));
+      },
+      openBuilder: (BuildContext context, void Function() action) {
+        return DetailPage(action, color: color,);
+      },
+    );
   }
 }

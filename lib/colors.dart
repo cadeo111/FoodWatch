@@ -8,6 +8,7 @@ class ItemActualColor{
   static const yellow= Color(0xffF3E37C);
   static const orange= Color(0xffF2994A);
   static const red= Color(0xffEF6F6C);
+  static const periwinkle = Color(0xFF92AAFF);
   static const blue = Color(0xff3EC6FF);
 }
 
