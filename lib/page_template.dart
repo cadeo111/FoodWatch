@@ -16,52 +16,53 @@ class PageTemplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: <Widget>[
-      Column(
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            Expanded(child:Container(
-                width: double.infinity, color: bgColors[color])),
-             Expanded(child:Container(
-               width: double.infinity, color: ItemActualColor.periwinkle))
-          ],
-        ),
-      SafeArea(
-          child: Container(
-        color: Color(0xFF92AAFF),
-        child: Column(
-          children: <Widget>[
-            Expanded(
-                flex: 5,
-                child: Container(
-                  child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24),
-                      child: child),
-                  decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color.fromRGBO(0, 0, 0, 0.1),
-                          spreadRadius: 0,
-                          blurRadius: 4,
-                          offset: Offset(0, 4), // changes position of shadow
-                        )
-                      ],
-                      borderRadius:
-                          BorderRadius.vertical(bottom: Radius.circular(25.0)),
-                      color: bgColors[color]),
-                )),
-            Expanded(
-              flex: 1,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: buttons,
-              ),
-            )
-          ],
-        ),
-      )),
-    ]);
+    return //Stack(children: <Widget>[
+//      Column(
+//        mainAxisSize: MainAxisSize.max,
+//        children: <Widget>[
+//          Expanded(
+//              child: Container(width: double.infinity, color: bgColors[color])),
+//          Expanded(
+//              child: Container(
+//                  width: double.infinity, color: ItemActualColor.periwinkle))
+//        ],
+//      ),
+        Container(
+            color: Color(0xFF92AAFF),
+            child: Column(
+              children: <Widget>[
+                Expanded(
+                    flex: 5,
+                    child: Container(
+                      child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 24),
+                          child: SafeArea(bottom:false,child: child)),
+                      decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color.fromRGBO(0, 0, 0, 0.1),
+                              spreadRadius: 0,
+                              blurRadius: 4,
+                              offset:
+                                  Offset(0, 4), // changes position of shadow
+                            )
+                          ],
+                          borderRadius: BorderRadius.vertical(
+                              bottom: Radius.circular(25.0)),
+                          color: bgColors[color]),
+                    )),
+                Expanded(
+                  flex: 1,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: buttons,
+                  ),
+                )
+              ],
+            ));
+//      ),
+//    ]);
   }
 }
 
