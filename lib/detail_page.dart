@@ -18,38 +18,57 @@ const _borderRadius = BorderRadius.only(
   bottomLeft: Radius.circular(25.0),
   bottomRight: Radius.circular(25.0),
 );
-const _itemDecoration = BoxDecoration(
-    borderRadius: _borderRadius,
-    color: ItemActualColor.white);
+const _itemDecoration =
+    BoxDecoration(borderRadius: _borderRadius, color: ItemActualColor.white);
 
-class DetailPage extends StatelessWidget {
+class DetailPage extends StatefulWidget {
+  const DetailPage(this.close, {Key key, this.color = ItemColor.grey})
+      : super(key: key);
   final ItemColor color;
   final Function close;
 
-  const DetailPage(this.close, {Key key, this.color = ItemColor.grey})
-      : super(key: key);
+  @override
+  _DetailPageState createState() => _DetailPageState(color, close);
+}
+
+class _DetailPageState extends State<DetailPage> {
+  final ItemColor color;
+  final Function close;
+
+  _DetailPageState(this.color, this.close);
+
+  File _imgFile;
+
+  void _setImageFile(File f) {
+    setState(() {
+      _imgFile = f;
+    });
+  }
 
   Widget _photoSlot(BuildContext context) {
-    Image img = Image.asset("images/test.jpg");
-    if(img != null){
-      return new Container(
-          decoration: BoxDecoration(
-              borderRadius: _borderRadius,
-              border: Border.all(color: Colors.white,width: 8)
-          ),
-          child:ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(0.0),
-                topRight: Radius.circular(19.0),
-                bottomLeft: Radius.circular(19.0),
-                bottomRight: Radius.circular(19.0),
-              ),
-              child:img
-          ));
-    }else {
-      return PhotoButton(onPressed: () => {_showPhotoDialog(context)});
+    if (_imgFile != null) {
+      Image img = Image.file(_imgFile);
+      return GestureDetector(
+          onLongPress: () {
+            _showPhotoDialog(context, _setImageFile, title: "Change Photo");
+          },
+          child: Container(
+              decoration: BoxDecoration(
+                  borderRadius: _borderRadius,
+                  border: Border.all(color: Colors.white, width: 8)),
+              child: ClipRRect(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(0.0),
+                    topRight: Radius.circular(19.0),
+                    bottomLeft: Radius.circular(19.0),
+                    bottomRight: Radius.circular(19.0),
+                  ),
+                  child: img)));
+    } else {
+      return PhotoButton(
+          onPressed: () =>
+              _showPhotoDialog(context, _setImageFile, title: "Set Photo"));
     }
-
   }
 
   @override
@@ -58,13 +77,17 @@ class DetailPage extends StatelessWidget {
       body: PageTemplate(
         color: color,
         buttons: [
-          PageButton("Home", onPressed: () => {close()}),
+          PageButton("Home", onPressed: () {
+            close();
+          }),
         ],
         child: ListView(
           shrinkWrap: true,
           children: <Widget>[
             GestureDetector(
-                onLongPress: () => {_showTitleDialog(context)},
+                onLongPress: () {
+                  _showTitleDialog(context);
+                },
                 child: Row(children: <Widget>[
                   Text("Milk",
                       style: TextStyle(fontSize: 40, color: fontColors[color]))
@@ -94,7 +117,9 @@ class DetailPage extends StatelessWidget {
               height: 16,
             ),
             GestureDetector(
-                onLongPress: () => {_showDescriptionDialog(context)},
+                onLongPress: () {
+                  _showDescriptionDialog(context);
+                },
                 child: Container(
                     padding: _padding,
                     decoration: _itemDecoration,
@@ -165,8 +190,8 @@ Future<void> _showDescriptionDialog(BuildContext context) async {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     SmallerOutlinedButton("Cancel",
-                        isRed: true, onPressed: () => {}),
-                    SmallerOutlinedButton("Save", onPressed: () => {}),
+                        isRed: true, onPressed: () {}),
+                    SmallerOutlinedButton("Save", onPressed: () {}),
                   ],
                 )
               ]));
@@ -213,8 +238,8 @@ Future<void> _showTitleDialog(BuildContext context) async {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     SmallerOutlinedButton("Cancel",
-                        isRed: true, onPressed: () => {}),
-                    SmallerOutlinedButton("Save", onPressed: () => {}),
+                        isRed: true, onPressed: () {}),
+                    SmallerOutlinedButton("Save", onPressed: () {}),
                   ],
                 )
               ]));
@@ -280,12 +305,21 @@ Future<DateTime> _showDateModal(BuildContext context, {DateTime init}) async {
 }
 
 class PhotoChild extends StatefulWidget {
+  final Function(File f) onPhotoSet;
+  final String title;
+
+  PhotoChild(this.onPhotoSet, this.title);
+
   @override
-  _PhotoChildState createState() => _PhotoChildState();
+  _PhotoChildState createState() => _PhotoChildState(onPhotoSet, title);
 }
 
 class _PhotoChildState extends State<PhotoChild> {
   File _imgFile;
+  final Function(File f) onPhotoSet;
+  final String title;
+
+  _PhotoChildState(this.onPhotoSet, this.title);
 
   void setImageFile(File f) {
     setState(() {
@@ -315,7 +349,9 @@ class _PhotoChildState extends State<PhotoChild> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          SmallerOutlinedButton("Cancel", isRed: true, onPressed: () => {}),
+          SmallerOutlinedButton("Cancel", isRed: true, onPressed: () {
+            Navigator.pop(context);
+          }),
         ],
       ),
     ];
@@ -330,8 +366,13 @@ class _PhotoChildState extends State<PhotoChild> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          SmallerOutlinedButton("Cancel", isRed: true, onPressed: () => {}),
-          SmallerOutlinedButton("Save", onPressed: () => {}),
+          SmallerOutlinedButton("Cancel", isRed: true, onPressed: () {
+            Navigator.pop(context);
+          }),
+          SmallerOutlinedButton("Save", onPressed: () {
+            onPhotoSet(_imgFile);
+            Navigator.pop(context);
+          }),
         ],
       ),
     ];
@@ -351,17 +392,19 @@ class _PhotoChildState extends State<PhotoChild> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(25)),
         ),
-        title: Text('Add Photo'),
+        title: Text(title),
         children: getChildren());
   }
 }
 
-Future<void> _showPhotoDialog(BuildContext context) async {
+Future<void> _showPhotoDialog(BuildContext context, Function(File f) onPhotoSet,
+    {String title}) async {
   return showDialog<void>(
     context: context,
     builder: (BuildContext context) {
       return BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5), child: PhotoChild());
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: PhotoChild(onPhotoSet, title));
     },
   );
 }

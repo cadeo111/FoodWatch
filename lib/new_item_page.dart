@@ -34,10 +34,10 @@ class NewItemPage extends StatelessWidget {
       body: PageTemplate(
           color: ItemColor.grey,
           buttons: [
-            PageButton("Cancel", isRed: true, onPressed: () => {back()}),
+            PageButton("Cancel", isRed: true, onPressed: (){back();}),
             PageButton(
               "Save",
-              onPressed: () => {},
+              onPressed: (){},
             )
           ],
           child: Column(
@@ -49,7 +49,7 @@ class NewItemPage extends StatelessWidget {
               DescriptionInput(),
               _divider,
               PhotoButton(
-                onPressed: () => {},
+                onPressed: (){},
               )
             ],
           )),
