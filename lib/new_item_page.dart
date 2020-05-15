@@ -1,6 +1,7 @@
 import 'package:FoodWatch/page_template.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'buttons.dart';
 import 'colors.dart';
 
 const _padding = EdgeInsets.all(16);

@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:FoodWatch/colors.dart';
@@ -6,15 +7,19 @@ import 'package:FoodWatch/page_template.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+import 'buttons.dart';
 
 const _padding = EdgeInsets.all(16);
+const _borderRadius = BorderRadius.only(
+  topLeft: Radius.circular(0.0),
+  topRight: Radius.circular(25.0),
+  bottomLeft: Radius.circular(25.0),
+  bottomRight: Radius.circular(25.0),
+);
 const _itemDecoration = BoxDecoration(
-    borderRadius: BorderRadius.only(
-      topLeft: Radius.circular(0.0),
-      topRight: Radius.circular(25.0),
-      bottomLeft: Radius.circular(25.0),
-      bottomRight: Radius.circular(25.0),
-    ),
+    borderRadius: _borderRadius,
     color: ItemActualColor.white);
 
 class DetailPage extends StatelessWidget {
@@ -24,6 +29,29 @@ class DetailPage extends StatelessWidget {
   const DetailPage(this.close, {Key key, this.color = ItemColor.grey})
       : super(key: key);
 
+  Widget _photoSlot(BuildContext context) {
+    Image img = Image.asset("images/test.jpg");
+    if(img != null){
+      return new Container(
+          decoration: BoxDecoration(
+              borderRadius: _borderRadius,
+              border: Border.all(color: Colors.white,width: 8)
+          ),
+          child:ClipRRect(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(0.0),
+                topRight: Radius.circular(19.0),
+                bottomLeft: Radius.circular(19.0),
+                bottomRight: Radius.circular(19.0),
+              ),
+              child:img
+          ));
+    }else {
+      return PhotoButton(onPressed: () => {_showPhotoDialog(context)});
+    }
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +60,8 @@ class DetailPage extends StatelessWidget {
         buttons: [
           PageButton("Home", onPressed: () => {close()}),
         ],
-        child: Column(
+        child: ListView(
+          shrinkWrap: true,
           children: <Widget>[
             GestureDetector(
                 onLongPress: () => {_showTitleDialog(context)},
@@ -78,7 +107,7 @@ class DetailPage extends StatelessWidget {
               color: Colors.transparent,
               height: 16,
             ),
-            PhotoButton(onPressed: () => {})
+            _photoSlot(context)
           ],
         ),
       ),
@@ -90,8 +119,8 @@ const _divider = const Divider(
   color: Colors.transparent,
   height: 16,
 );
+
 const _fontWeightText = FontWeight.w300;
-const _fontWeightTitles = FontWeight.w500;
 
 Future<void> _showDescriptionDialog(BuildContext context) async {
   return showDialog<void>(
@@ -160,8 +189,6 @@ Future<void> _showTitleDialog(BuildContext context) async {
               title: Text('Title'),
               children: <Widget>[
                 TextField(
-//                expands: true,
-//                maxLines:10,
                   cursorColor: ItemActualColor.blue,
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
@@ -252,13 +279,89 @@ Future<DateTime> _showDateModal(BuildContext context, {DateTime init}) async {
   }
 }
 
-//class ChangePicture extends StatelessWidget {
-//  @override
-//  Widget build(BuildContext context) {
-//    AlertDialog();
-//    return Container(
-//          color: Colors.transparent,
-//          child: Image.asset("images/test.jpg"),
-//        );
-//  }
-//}
+class PhotoChild extends StatefulWidget {
+  @override
+  _PhotoChildState createState() => _PhotoChildState();
+}
+
+class _PhotoChildState extends State<PhotoChild> {
+  File _imgFile;
+
+  void setImageFile(File f) {
+    setState(() {
+      _imgFile = f;
+    });
+  }
+
+  Future<void> setImageFromGallery() async {
+    setImageFile(await ImagePicker.pickImage(source: ImageSource.gallery));
+  }
+
+  Future<void> setImageFromCamera() async {
+    setImageFile(await ImagePicker.pickImage(source: ImageSource.camera));
+  }
+
+  List<Widget> _childrenWithoutImage() {
+    return <Widget>[
+      PhotoSelectionButton("Take Photo ", onPressed: () {
+        setImageFromCamera();
+      }),
+      _divider,
+      PhotoSelectionButton("From Gallery", onPressed: () {
+        setImageFromGallery();
+      }),
+      _divider,
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          SmallerOutlinedButton("Cancel", isRed: true, onPressed: () => {}),
+        ],
+      ),
+    ];
+  }
+
+  List<Widget> _childrenWithImage(File file) {
+    log(file?.path);
+    return <Widget>[
+      Image.file(file),
+      _divider,
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          SmallerOutlinedButton("Cancel", isRed: true, onPressed: () => {}),
+          SmallerOutlinedButton("Save", onPressed: () => {}),
+        ],
+      ),
+    ];
+  }
+
+  List<Widget> getChildren() {
+    return (_imgFile == null)
+        ? _childrenWithoutImage()
+        : _childrenWithImage(_imgFile);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SimpleDialog(
+        contentPadding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
+        titlePadding: EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(25)),
+        ),
+        title: Text('Add Photo'),
+        children: getChildren());
+  }
+}
+
+Future<void> _showPhotoDialog(BuildContext context) async {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5), child: PhotoChild());
+    },
+  );
+}

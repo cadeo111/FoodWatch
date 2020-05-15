@@ -4,6 +4,7 @@ import 'package:FoodWatch/page_template.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
+import 'buttons.dart';
 import 'colors.dart';
 import 'main.dart';
 
