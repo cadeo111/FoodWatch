@@ -12,7 +12,7 @@ const _itemDecoration = BoxDecoration(
       bottomLeft: Radius.circular(25.0),
       bottomRight: Radius.circular(25.0),
     ),
-    color: ItemActualColor.white);
+    color: ItemColor.white);
 const _divider = const Divider(
   color: Colors.transparent,
   height: 16,
@@ -72,15 +72,15 @@ class TitleInput extends StatelessWidget {
               ),
               _divider,
               TextField(
-                cursorColor: ItemActualColor.blue,
+                cursorColor: ItemColor.blue,
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: ItemActualColor.darkGrey),
+                    borderSide: BorderSide(color: ItemColor.darkGrey),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: ItemActualColor.blue),
+                    borderSide: BorderSide(color: ItemColor.blue),
                   ),
                   contentPadding: EdgeInsets.all(12),
                   border: InputBorder.none,
@@ -113,15 +113,15 @@ class DescriptionInput extends StatelessWidget {
                 minLines: 2,
                 maxLines: 8,
 //                maxLines:10,
-                cursorColor: ItemActualColor.blue,
+                cursorColor: ItemColor.blue,
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: ItemActualColor.darkGrey),
+                    borderSide: BorderSide(color: ItemColor.darkGrey),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: ItemActualColor.blue),
+                    borderSide: BorderSide(color: ItemColor.blue),
                   ),
                   contentPadding: EdgeInsets.all(12),
                   border: InputBorder.none,

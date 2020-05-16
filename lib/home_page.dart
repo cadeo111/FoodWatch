@@ -1,8 +1,13 @@
+import 'dart:collection';
+
 import 'package:FoodWatch/detail_page.dart';
+import 'package:FoodWatch/model/ItemModel.dart';
 import 'package:FoodWatch/new_item_page.dart';
 import 'package:FoodWatch/page_template.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 import 'buttons.dart';
 import 'colors.dart';
@@ -16,7 +21,7 @@ class HomePage extends StatelessWidget {
         buttons: [
           OpenContainer(
               closedColor: Colors.white,
-              openColor: ItemActualColor.grey,
+              openColor: ItemColor.grey,
               closedElevation: 0,
               openElevation: 15.0,
               openShape: const RoundedRectangleBorder(
@@ -36,24 +41,30 @@ class HomePage extends StatelessWidget {
         ],
         child: Stack(
           children: <Widget>[
-            ListView.separated(
-              padding: EdgeInsets.only(top: 100),
-              itemBuilder: (BuildContext context, int index) {
-                return ListItem();
-              },
-              separatorBuilder: (BuildContext context, int index) =>
-                  const Divider(
-                color: Colors.transparent,
-                height: 16,
-              ),
-              itemCount: 10,
-            ),
+            ScopedModelDescendant<ItemsModel>(builder: _listOfItems),
             CustomSearchBar()
           ],
         ),
       ),
     );
   }
+}
+
+ListView _listOfItems(
+    BuildContext context, Widget child, ItemsModel itemsModel) {
+  UnmodifiableListView<Item> items = itemsModel.items;
+  return ListView.separated(
+    padding: EdgeInsets.only(top: 100),
+    itemCount: items.length,
+    itemBuilder: (BuildContext context, int index) {
+      Item item = items[index];
+      return ListItem(item: item);
+    },
+    separatorBuilder: (BuildContext context, int index) => const Divider(
+      color: Colors.transparent,
+      height: 16,
+    ),
+  );
 }
 
 class CustomSearchBar extends StatelessWidget {
@@ -91,8 +102,9 @@ class CustomSearchBar extends StatelessWidget {
 class YearPill extends StatelessWidget {
   final bool bold;
   final bool white;
+  final int year;
 
-  const YearPill({Key key, this.bold = false, this.white = false})
+  const YearPill(this.year, {Key key, this.bold = false, this.white = false})
       : super(key: key);
 
   @override
@@ -129,7 +141,7 @@ class YearPill extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(25.0)),
           color: bgColor),
       child: Text(
-        '2020',
+        year.toString(),
         style: TextStyle(
             fontSize: 32, fontWeight: FontWeight.w200, color: textColor),
       ),
@@ -138,28 +150,30 @@ class YearPill extends StatelessWidget {
 }
 
 class ListItem extends StatelessWidget {
-  final ItemColor color;
-  final bool boldYear;
-
-  const ListItem({Key key, this.color = ItemColor.grey, this.boldYear = false})
-      : super(key: key);
+  final Item item;
+  const ListItem({Key key, @required this.item}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor = bgColors[color];
-    Color fontColor = fontColors[color.index];
+    String monthDay = (new DateFormat('MMMd')).format(item.expiration);
+    Color color = getColorFromDate(item.expiration);
+    Color bgColor = color;
+    Color fontColor = ItemColor.getFontColor(color);
+
+    int year = item.expiration.year;
+    bool boldYear = item.expiration.difference(DateTime.now()).inDays > 365;
     Widget pill;
     if (fontColor == Colors.white) {
-      if (this.boldYear) {
-        pill = YearPill(white: true, bold: true);
+      if (boldYear) {
+        pill = YearPill(year, white: true, bold: true);
       } else {
-        pill = YearPill(white: true);
+        pill = YearPill(year, white: true);
       }
     } else {
-      if (this.boldYear) {
-        pill = YearPill(bold: true);
+      if (boldYear) {
+        pill = YearPill(year, bold: true);
       } else {
-        pill = YearPill();
+        pill = YearPill(year);
       }
     }
 
@@ -186,23 +200,28 @@ class ListItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text(
-                    "Milk",
+                  Flexible(
+                    flex: 1,
+                  child:Text(
+                    item.title,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.w300,
                         color: fontColor),
-                  ),
-                  Text("Aug 24",
+                  )),
+                  (boldYear)?pill:Text(monthDay,
                       style: TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.w200,
-                          color: fontColor)),
-                  pill
+                          color: fontColor))
                 ]));
       },
       openBuilder: (BuildContext context, void Function() action) {
-        return DetailPage(action, color: color,);
+        return DetailPage(
+          item:item,
+          close:action,
+        );
       },
     );
   }

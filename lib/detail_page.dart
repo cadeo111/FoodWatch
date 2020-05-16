@@ -8,8 +8,10 @@ import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 import 'buttons.dart';
+import 'model/ItemModel.dart';
 
 const _padding = EdgeInsets.all(16);
 const _borderRadius = BorderRadius.only(
@@ -19,23 +21,23 @@ const _borderRadius = BorderRadius.only(
   bottomRight: Radius.circular(25.0),
 );
 const _itemDecoration =
-    BoxDecoration(borderRadius: _borderRadius, color: ItemActualColor.white);
+    BoxDecoration(borderRadius: _borderRadius, color: ItemColor.white);
 
 class DetailPage extends StatefulWidget {
-  const DetailPage(this.close, {Key key, this.color = ItemColor.grey})
+  const DetailPage({@required this.close, Key key, this.item})
       : super(key: key);
-  final ItemColor color;
+  final Item item;
   final Function close;
 
   @override
-  _DetailPageState createState() => _DetailPageState(color, close);
+  _DetailPageState createState() => _DetailPageState(item, close);
 }
 
 class _DetailPageState extends State<DetailPage> {
-  final ItemColor color;
+  final Item item;
   final Function close;
 
-  _DetailPageState(this.color, this.close);
+  _DetailPageState(this.item, this.close);
 
   File _imgFile;
 
@@ -75,7 +77,7 @@ class _DetailPageState extends State<DetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: PageTemplate(
-        color: color,
+        color: item.color,
         buttons: [
           PageButton("Home", onPressed: () {
             close();
@@ -89,9 +91,13 @@ class _DetailPageState extends State<DetailPage> {
                   _showTitleDialog(context);
                 },
                 child: Row(children: <Widget>[
-                  Text("Milk",
-                      style: TextStyle(fontSize: 40, color: fontColors[color]))
+                  Text(item.title,
+                      style: TextStyle(fontSize: 40, color: ItemColor.getFontColor(item.color)))
                 ])),
+            const Divider(
+              color: Colors.transparent,
+              height: 8,
+            ),
             GestureDetector(
                 onLongPress: () => {
                       _showDateModal(context)
@@ -103,10 +109,10 @@ class _DetailPageState extends State<DetailPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      Text("Expired ",
+                      Text((item.isExpired)?"Expired ":"Expires ",
                           style: TextStyle(
                               fontSize: 25, fontWeight: FontWeight.w500)),
-                      Text("Jan 12, 2020",
+                      Text(DateFormat("MMM d, yyyy").format(item.expiration),//"Jan 12, 2020"
                           style: TextStyle(
                               fontSize: 25, fontWeight: FontWeight.w300))
                     ],
@@ -125,7 +131,7 @@ class _DetailPageState extends State<DetailPage> {
                     decoration: _itemDecoration,
                     alignment: AlignmentDirectional(0.0, 0.0),
                     child: Text(
-                        "Organic Milk from costco 3 containers Organic Milk from costco 3 containers  Organic Milk from costco 3 containers  Organic Milk from costco 3 containers ",
+                        item.desc,
                         style: TextStyle(
                             fontSize: 25, fontWeight: FontWeight.w300)))),
             const Divider(
@@ -166,15 +172,15 @@ Future<void> _showDescriptionDialog(BuildContext context) async {
                   minLines: 2,
                   maxLines: 8,
 //                maxLines:10,
-                  cursorColor: ItemActualColor.blue,
+                  cursorColor: ItemColor.blue,
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      borderSide: BorderSide(color: ItemActualColor.darkGrey),
+                      borderSide: BorderSide(color: ItemColor.darkGrey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      borderSide: BorderSide(color: ItemActualColor.blue),
+                      borderSide: BorderSide(color: ItemColor.blue),
                     ),
                     contentPadding: EdgeInsets.all(12),
                     border: InputBorder.none,
@@ -214,15 +220,15 @@ Future<void> _showTitleDialog(BuildContext context) async {
               title: Text('Title'),
               children: <Widget>[
                 TextField(
-                  cursorColor: ItemActualColor.blue,
+                  cursorColor: ItemColor.blue,
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      borderSide: BorderSide(color: ItemActualColor.darkGrey),
+                      borderSide: BorderSide(color: ItemColor.darkGrey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      borderSide: BorderSide(color: ItemActualColor.blue),
+                      borderSide: BorderSide(color: ItemColor.blue),
                     ),
                     contentPadding: EdgeInsets.all(12),
                     border: InputBorder.none,

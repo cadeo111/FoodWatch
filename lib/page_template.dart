@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class PageTemplate extends StatelessWidget {
   final List<Widget> buttons;
   final Widget child;
-  final ItemColor color;
+  final Color color;
 
   const PageTemplate(
       {Key key,
@@ -37,7 +37,7 @@ class PageTemplate extends StatelessWidget {
                       ],
                       borderRadius:
                           BorderRadius.vertical(bottom: Radius.circular(25.0)),
-                      color: bgColors[color]),
+                      color: color),
                 )),
             Expanded(
               flex: 1,

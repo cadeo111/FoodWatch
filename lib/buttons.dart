@@ -70,7 +70,7 @@ class PhotoSelectionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor = ItemActualColor.periwinkle;
+    Color bgColor = ItemColor.periwinkle;
     Color textColor = Colors.white;
 
     return SizedBox(
