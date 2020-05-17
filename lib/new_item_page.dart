@@ -28,7 +28,7 @@ const _divider = const Divider(
 const _fontWeightText = FontWeight.w300;
 const _fontWeightTitles = FontWeight.w500;
 
-_copyImageToAppStorage(File imageFile) async {
+copyImageToAppStorage(File imageFile) async {
   //from https://stackoverflow.com/questions/51338041/how-to-save-image-file-in-flutter-file-selected-using-image-picker-plugin
   // getting a directory path for saving
   final String path = (await getApplicationDocumentsDirectory()).path;
@@ -56,7 +56,7 @@ class _NewItemPageState extends State<NewItemPage> {
   DateTime _expiration = clearTime(DateTime.now().add(Duration(days: 1)));
   File _img;
 
-  bool _isButtonDisabled() {
+  bool _isSaveButtonDisabled() {
     return !(_title != null && _expiration != clearTime(DateTime.now()));
   }
 
@@ -83,7 +83,7 @@ class _NewItemPageState extends State<NewItemPage> {
   createNewItem(BuildContext context) async {
     File savedImageFile;
     if (_img != null) {
-      savedImageFile = await _copyImageToAppStorage(_img);
+      savedImageFile = await copyImageToAppStorage(_img);
     }
     Item item = Item(
         title: _title,
@@ -104,7 +104,7 @@ class _NewItemPageState extends State<NewItemPage> {
             }),
             PageButton(
               "Save",
-              disabled: _isButtonDisabled(),
+              disabled: _isSaveButtonDisabled(),
               onPressed: () async {
                 await createNewItem(context);
                 widget.back();
@@ -112,6 +112,7 @@ class _NewItemPageState extends State<NewItemPage> {
             )
           ],
           child: ListView(
+            shrinkWrap: false,
             children: <Widget>[
               TitleInput(onChangeText: (String input) {
                 setTitle(input);

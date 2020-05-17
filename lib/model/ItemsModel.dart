@@ -11,36 +11,35 @@ import '../colors.dart';
 var _uuid = Uuid();
 
 isDateExpired(DateTime expiration) =>
-    expiration.difference(DateTime.now()).inDays <= 0 &&
-    expiration.day != DateTime.now().day + 1;
+    expiration
+        .difference(DateTime.now())
+        .inDays <= 0 &&
+        expiration.day != DateTime
+            .now()
+            .day + 1;
 
 class Item {
-  final String _title; //todo make sure < 13 char long
+  final String title; //todo make sure < 13 char long
   final DateTime expiration;
-  final String _desc; //todo make sure < 300 char long
+  final String desc; //todo make sure < 300 char long
   final String id;
   final File img;
+
   static get maxTitleChars => 13;
+
   static get maxDescChars => 300;
 
   get color {
     return getColorFromDate(expiration);
   }
 
-  get title => _title;
-
-  get desc => _desc;
 
   get isExpired => isDateExpired(this.expiration);
 
-  Item(
-      {@required String title,
-      @required this.expiration,
-      String desc,
-      this.img})
-      : this._desc = desc,
-        this._title = title,
-        this.id = _uuid.v1();
+  Item({@required this.title, @required this.expiration, this.desc, this.img})
+      :this.id = _uuid.v1();
+
+  Item.withId({this.title, this.expiration, this.desc, this.id, this.img});
 
   bool operator ==(other) => other is Item && id == other.id;
 
@@ -49,7 +48,7 @@ class Item {
 
   @override
   String toString() {
-    return 'Item{_title: $_title, expiration: $expiration, _desc: $_desc, id: $id, img: $img}';
+    return 'Item{_title: $title, expiration: $expiration, _desc: $desc, id: $id, img: $img}';
   }
 
 
@@ -57,7 +56,7 @@ class Item {
 
 class ItemsModel extends Model {
   final Map<String, Item> _items =
-      new Map(); // most recent is the bottom of the list
+  new Map(); // most recent is the bottom of the list
 
   ItemsModel({List<Item> items = const <Item>[]}) {
     items.forEach((i) {
@@ -76,6 +75,13 @@ class ItemsModel extends Model {
     notifyListeners();
   }
 
+  void update(Item updated) {
+    _items[updated.id] = updated;
+    notifyListeners();
+  }
+
   static ItemsModel of(BuildContext context) =>
       ScopedModel.of<ItemsModel>(context);
+
+
 }
