@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:FoodWatch/colors.dart';
@@ -12,6 +13,8 @@ import 'package:intl/intl.dart';
 
 import 'buttons.dart';
 import 'model/ItemsModel.dart';
+import 'new_item_page.dart';
+import 'package:collection/collection.dart';
 
 const _padding = EdgeInsets.all(16);
 const _borderRadius = BorderRadius.only(
@@ -38,24 +41,69 @@ class _DetailPageState extends State<DetailPage> {
     _desc = item.desc;
     _title = item.title;
     _expiration = item.expiration;
-    _imgFile = item.img;
+    _img = item.img;
+    _itemImgBytes = item?.img?.readAsBytesSync();
   }
 
-  File _imgFile;
+  File _img;
+  Uint8List _itemImgBytes;
+  bool _imageChanged = false;
+  bool _imgSame = true;
   String _desc;
   String _title;
   DateTime _expiration;
 
+  _updateItem(BuildContext context) async {
+    File savedImageFile = widget.item.img;
+    if (_img != null && _img != savedImageFile) {
+      savedImageFile = await copyImageToAppStorage(_img);
+    }
+    Item item = Item.withId(
+        id: widget.item.id,
+        title: _title,
+        expiration: _expiration,
+        desc: _desc,
+        img: savedImageFile);
+    ItemsModel.of(context).update(item);
+  }
+
+  void setImgSame(bool b) {
+    setState(() {
+      _imgSame = b;
+    });
+  }
+
+  void setImgChanged(bool b) {
+    setState(() {
+      _imageChanged = b;
+    });
+  }
+
+  void updateImageSame() async {
+    if (_imageChanged) {
+      if (widget.item.img == _img) {
+        setImgSame(true);
+      } else if (_img == null) {
+        setImgSame(false);
+      } else {
+        final Uint8List imgBytes = await _img.readAsBytes();
+        setImgSame(ListEquality().equals(imgBytes, _itemImgBytes));
+      }
+      setImgChanged(false);
+    }
+  }
+
   bool _itemNeedsUpdating() {
-    return (_imgFile != null) ||
-        (_desc != null && _desc != widget.item.desc) ||
+    return (!_imgSame) ||
+        (_desc != widget.item.desc) ||
         (_title != widget.item.title) ||
-        (_expiration != null && _expiration != widget.item.expiration);
+        (_expiration != widget.item.expiration);
   }
 
   void _setImageFile(File f) {
     setState(() {
-      _imgFile = f;
+      _img = f;
+      updateImageSame();
     });
   }
 
@@ -108,7 +156,7 @@ class _DetailPageState extends State<DetailPage> {
         PageButton(
           "Save",
           onPressed: () async {
-//            await createNewItem(context);
+            await _updateItem(context);
             widget.close();
           },
         )
@@ -129,12 +177,12 @@ class _DetailPageState extends State<DetailPage> {
         color: getColorFromDate(_expiration),
         buttons: _getButtons(),
         child: ListView(
-          shrinkWrap: true,
+          shrinkWrap: false,
           children: <Widget>[
             GestureDetector(
                 onLongPress: () async {
                   String title = await _showTitleDialog(context, init: _title);
-                  if(title != null) {
+                  if (title != null) {
                     _setTitle(title);
                   }
                 },
@@ -186,14 +234,18 @@ class _DetailPageState extends State<DetailPage> {
             ),
             photoSlot(
                 context,
-                _imgFile,
+                _img,
                 _setImageFile,
                 _borderRadius,
                 BorderRadius.only(
                     topLeft: Radius.circular(0.0),
                     topRight: Radius.circular(19.0),
                     bottomLeft: Radius.circular(19.0),
-                    bottomRight: Radius.circular(19.0)))
+                    bottomRight: Radius.circular(19.0))),
+            const Divider(
+              color: Colors.transparent,
+              height: 16,
+            ),
           ],
         ),
       ),
@@ -302,17 +354,16 @@ class _TitleDialogContent extends StatefulWidget {
 class __TitleDialogContentState extends State<_TitleDialogContent> {
   TextEditingController controller;
   int inputLength;
+
   __TitleDialogContentState(String init) {
     controller = TextEditingController(text: init);
     inputLength = init?.length ?? 0;
     controller.addListener(() {
-      setState((){
+      setState(() {
         inputLength = controller.text.length;
       });
     });
   }
-
-
 
   @override
   void dispose() {
@@ -361,8 +412,8 @@ class __TitleDialogContentState extends State<_TitleDialogContent> {
                   SmallerOutlinedButton("Cancel", isRed: true, onPressed: () {
                     Navigator.pop(context);
                   }),
-                  SmallerOutlinedButton("Save",
-                      disabled: (inputLength <= 0), onPressed: () {
+                  SmallerOutlinedButton("Save", disabled: (inputLength <= 0),
+                      onPressed: () {
                     Navigator.pop(context, controller.text);
                   }),
                 ],
@@ -375,14 +426,13 @@ Future<String> _showTitleDialog(BuildContext context, {String init}) async {
   return showDialog<String>(
     context: context,
     builder: (BuildContext context) {
-      return _TitleDialogContent(init:init);
+      return _TitleDialogContent(init: init);
     },
   );
 }
 
 Future<DateTime> showDateModal(BuildContext context, {DateTime init}) async {
   DateTime placeholderDate = clearTime(DateTime.now().add(Duration(days: 1)));
-//  DateTime placeholderDate = new DateTime(n.year, n.month,  n.day+1, 0,0,0,0,0);
   DateTime date = (init == null) ? placeholderDate : init;
   DateTime min;
   DateTime start;
@@ -482,12 +532,10 @@ class _PhotoChildState extends State<PhotoChild> {
     return <Widget>[
       PhotoSelectionButton("Take Photo ", onPressed: () async {
         setImageFromCamera();
-//        Navigator.pop(context);
       }),
       _divider,
       PhotoSelectionButton("From Gallery", onPressed: () async {
         setImageFromGallery();
-//        Navigator.pop(context);
       }),
       _divider,
       Row(
