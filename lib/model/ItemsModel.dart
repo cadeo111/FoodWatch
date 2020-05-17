@@ -8,7 +8,10 @@ import 'package:uuid/uuid.dart';
 import '../colors.dart';
 
 var _uuid = Uuid();
-isDateExpired(DateTime expiration) => expiration.difference(DateTime.now()).inDays <= 0 && expiration.day != DateTime.now().day+1;
+
+isDateExpired(DateTime expiration) =>
+    expiration.difference(DateTime.now()).inDays <= 0 &&
+    expiration.day != DateTime.now().day + 1;
 
 class Item {
   final String _title; //todo make sure < 13 char long
@@ -16,43 +19,42 @@ class Item {
   final String _desc; //todo make sure < 300 char long
   final String id;
   final File img;
-  get color{
+
+  get color {
     return getColorFromDate(expiration);
   }
+
   get title => _title;
-  get desc =>  _desc;
+
+  get desc => _desc;
+
   get isExpired => isDateExpired(this.expiration);
-  String titleTruncated({int maxNumOfChars = 13}){
-    if(_title == null){
-      return "~~";
-    }
-    if(_title.length > maxNumOfChars){
-      return _title.substring(0, maxNumOfChars - 2) + "...";
-    }else{
-      return _title;
-    }
-  }
-  String descTruncated({int maxNumOfChars = 300}){
-    if(_desc == null){
-      return "~~";
-    }
-    if(_desc.length > maxNumOfChars){
-      return _desc.substring(0, maxNumOfChars - 2) + "...";
-    }else{
-      return _desc;
-    }
-  }
-  Item({@required String title, @required this.expiration, String desc, this.img})
-      :this._desc = desc, this._title = title, this.id = _uuid.v1();
+
+  Item(
+      {@required String title,
+      @required this.expiration,
+      String desc,
+      this.img})
+      : this._desc = desc,
+        this._title = title,
+        this.id = _uuid.v1();
 
   bool operator ==(other) => other is Item && id == other.id;
 
   @override
   int get hashCode => int.parse(id.substring(0, 8), radix: 16);
+
+  @override
+  String toString() {
+    return 'Item{_title: $_title, expiration: $expiration, _desc: $_desc, id: $id, img: $img}';
+  }
+
+
 }
 
 class ItemsModel extends Model {
-  final Map<String, Item> _items = new Map();// most recent is the bottom of the list
+  final Map<String, Item> _items =
+      new Map(); // most recent is the bottom of the list
 
   ItemsModel({List<Item> items = const <Item>[]}) {
     items.forEach((i) {
@@ -66,10 +68,7 @@ class ItemsModel extends Model {
     return UnmodifiableListView(list);
   }
 
-
   void add(Item item) => _items[item.id] = item;
-
-  Item get(String id) => _items[id];
 
   static ItemsModel of(BuildContext context) =>
       ScopedModel.of<ItemsModel>(context);

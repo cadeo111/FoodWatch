@@ -1,8 +1,16 @@
+import 'dart:io';
+import 'dart:math';
+import 'dart:developer' as dev;
+
 import 'package:FoodWatch/page_template.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_time_patterns.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'buttons.dart';
 import 'colors.dart';
+import 'detail_page.dart';
+import 'model/ItemsModel.dart';
 
 const _padding = EdgeInsets.all(16);
 const _itemDecoration = BoxDecoration(
@@ -20,7 +28,17 @@ const _divider = const Divider(
 const _fontWeightText = FontWeight.w300;
 const _fontWeightTitles = FontWeight.w500;
 
-class NewItemPage extends StatelessWidget {
+_copyImageToAppStorage(File imageFile) async {
+  //from https://stackoverflow.com/questions/51338041/how-to-save-image-file-in-flutter-file-selected-using-image-picker-plugin
+  // getting a directory path for saving
+  final String path = (await getApplicationDocumentsDirectory()).path;
+// copy the file to a new path
+  String rand = (Random().nextDouble() * 1e10).toInt().toRadixString(16);
+  final File newImage = await imageFile.copy('$path/PIC_$rand.png');
+  return newImage;
+}
+
+class NewItemPage extends StatefulWidget {
   final Function back;
 
   const NewItemPage(
@@ -29,28 +47,91 @@ class NewItemPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _NewItemPageState createState() => _NewItemPageState();
+}
+
+class _NewItemPageState extends State<NewItemPage> {
+  String _title;
+  String _desc;
+  DateTime _expiration = clearTime(DateTime.now().add(Duration(days: 1)));
+  File _img;
+
+  bool _isButtonDisabled() {
+    return !(_title != null && _expiration != clearTime(DateTime.now()));
+  }
+
+  setTitle(String title) {
+    setState(() {
+      _title = title;
+    });
+  }
+
+  setDesc(String desc) {
+    setState(() {
+      _desc = desc;
+    });
+  }
+
+  setExpiration(DateTime expiration) {
+    if (expiration != null) {
+      setState(() {
+        _expiration = expiration;
+      });
+    }
+  }
+
+  createNewItem(BuildContext context) async {
+    File savedImageFile;
+    if (_img != null) {
+      savedImageFile = await _copyImageToAppStorage(_img);
+    }
+    Item item = Item(
+        title: _title,
+        expiration: _expiration,
+        desc: _desc,
+        img: savedImageFile);
+    ItemsModel.of(context).add(item);
+    dev.log("Created list item $item");
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: PageTemplate(
-          color: ItemColor.grey,
+          color: getColorFromDate(_expiration),
           buttons: [
-            PageButton("Cancel", isRed: true, onPressed: (){back();}),
+            PageButton("Cancel", isRed: true, onPressed: () {
+              widget.back();
+            }),
             PageButton(
               "Save",
-              onPressed: (){},
+              disabled: _isButtonDisabled(),
+              onPressed: () async {
+                await createNewItem(context);
+                widget.back();
+              },
             )
           ],
-          child: Column(
+          child: ListView(
             children: <Widget>[
-              TitleInput(),
+              TitleInput(onChangeText: (String input) {
+                setTitle(input);
+              }),
               _divider,
-              ExpirationInput(),
+              ExpirationInput(_expiration, onDateChanged: (DateTime dt) {
+                setExpiration(dt);
+              }),
               _divider,
-              DescriptionInput(),
+              DescriptionInput(onChangeText: (String input) {
+                setDesc(input);
+              }),
               _divider,
-              PhotoButton(
-                onPressed: (){},
-              )
+              photoSlot(context, _img, (File f) {
+                setState(() {
+                  _img = f;
+                });
+              }, BorderRadius.all(Radius.circular(30)),
+                  BorderRadius.all(Radius.circular(22)))
             ],
           )),
     );
@@ -58,6 +139,10 @@ class NewItemPage extends StatelessWidget {
 }
 
 class TitleInput extends StatelessWidget {
+  final void Function(String input) onChangeText;
+
+  TitleInput({this.onChangeText});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -72,6 +157,7 @@ class TitleInput extends StatelessWidget {
               ),
               _divider,
               TextField(
+                onChanged: onChangeText,
                 cursorColor: ItemColor.blue,
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
@@ -95,6 +181,10 @@ class TitleInput extends StatelessWidget {
 }
 
 class DescriptionInput extends StatelessWidget {
+  final void Function(String input) onChangeText;
+
+  DescriptionInput({this.onChangeText});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -109,10 +199,9 @@ class DescriptionInput extends StatelessWidget {
               ),
               _divider,
               TextField(
-//                expands: true,
+                onChanged: onChangeText,
                 minLines: 2,
                 maxLines: 8,
-//                maxLines:10,
                 cursorColor: ItemColor.blue,
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
@@ -136,27 +225,59 @@ class DescriptionInput extends StatelessWidget {
 }
 
 class ExpirationInput extends StatelessWidget {
-  final DateTime date = DateTime.now();
+  final DateTime date;
+  final void Function(DateTime dt) onDateChanged;
+
+  const ExpirationInput(this.date, {Key key, this.onDateChanged})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        padding: _padding,
-        decoration: _itemDecoration,
-        child: Padding(
-            padding: EdgeInsets.only(bottom: 2),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    "Expiration",
-                    style:
-                        TextStyle(fontSize: 25, fontWeight: _fontWeightTitles),
-                  ),
-                  _divider,
-                  Text(DateFormat('MMM d, yyyy').format(date),
-                      style:
-                          TextStyle(fontSize: 30, fontWeight: _fontWeightText))
-                ])));
+//    log("building " + this.date.toIso8601String());
+    return GestureDetector(
+        onTap: () {
+          dev.log("expIn: $date");
+          showDateModal(context, init: date).then((DateTime dt) {
+            onDateChanged(dt);
+          });
+        },
+        child: Container(
+            padding: _padding,
+            decoration: _itemDecoration,
+            child: Padding(
+                padding: EdgeInsets.only(bottom: 2),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        "Expiration",
+                        style: TextStyle(
+                            fontSize: 25, fontWeight: _fontWeightTitles),
+                      ),
+                      _divider,
+                      Text(DateFormat('MMM d, yyyy').format(date),
+                          style: TextStyle(
+                              fontSize: 30, fontWeight: _fontWeightText))
+                    ]))));
+  }
+}
+
+Widget photoSlot(BuildContext context, File imgFile, setImageFile(File f),
+    BorderRadius containerRadius, BorderRadius imgRadius) {
+  if (imgFile != null) {
+    Image img = Image.file(imgFile);
+    return GestureDetector(
+        onTap: () {
+          showPhotoDialog(context, setImageFile, title: "Change Photo");
+        },
+        child: Container(
+            decoration: BoxDecoration(
+                borderRadius: containerRadius,
+                border: Border.all(color: Colors.white, width: 8)),
+            child: ClipRRect(borderRadius: imgRadius, child: img)));
+  } else {
+    return PhotoButton(
+        onPressed: () =>
+            showPhotoDialog(context, setImageFile, title: "Set Photo"));
   }
 }
