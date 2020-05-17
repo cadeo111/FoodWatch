@@ -91,7 +91,6 @@ class _NewItemPageState extends State<NewItemPage> {
         desc: _desc,
         img: savedImageFile);
     ItemsModel.of(context).add(item);
-    dev.log("Created list item $item");
   }
 
   @override
@@ -157,6 +156,7 @@ class TitleInput extends StatelessWidget {
               ),
               _divider,
               TextField(
+                maxLength: Item.maxTitleChars,
                 onChanged: onChangeText,
                 cursorColor: ItemColor.blue,
                 decoration: InputDecoration(
@@ -199,6 +199,7 @@ class DescriptionInput extends StatelessWidget {
               ),
               _divider,
               TextField(
+                maxLength: Item.maxDescChars,
                 onChanged: onChangeText,
                 minLines: 2,
                 maxLines: 8,
@@ -233,10 +234,8 @@ class ExpirationInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-//    log("building " + this.date.toIso8601String());
     return GestureDetector(
         onTap: () {
-          dev.log("expIn: $date");
           showDateModal(context, init: date).then((DateTime dt) {
             onDateChanged(dt);
           });
@@ -268,7 +267,10 @@ Widget photoSlot(BuildContext context, File imgFile, setImageFile(File f),
     Image img = Image.file(imgFile);
     return GestureDetector(
         onTap: () {
-          showPhotoDialog(context, setImageFile, title: "Change Photo");
+          showPhotoDialog(context, setImageFile, title: "Change Photo",
+              onDelete: () {
+            setImageFile(null);
+          });
         },
         child: Container(
             decoration: BoxDecoration(

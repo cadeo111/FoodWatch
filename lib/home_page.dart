@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:FoodWatch/detail_page.dart';
-import 'package:FoodWatch/model/ItemModel.dart';
+import 'package:FoodWatch/model/ItemsModel.dart';
 import 'package:FoodWatch/new_item_page.dart';
 import 'package:FoodWatch/page_template.dart';
 import 'package:animations/animations.dart';
@@ -12,6 +12,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'buttons.dart';
 import 'colors.dart';
 import 'main.dart';
+
 
 class HomePage extends StatelessWidget {
   @override

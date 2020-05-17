@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:FoodWatch/model/ItemModel.dart';
+import 'package:FoodWatch/model/ItemsModel.dart';
 import 'package:FoodWatch/new_item_page.dart';
 import 'package:flutter/material.dart';
 import 'package:mock_data/mock_data.dart';

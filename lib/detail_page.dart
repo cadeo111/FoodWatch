@@ -11,7 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import 'buttons.dart';
-import 'model/ItemModel.dart';
+import 'model/ItemsModel.dart';
 
 const _padding = EdgeInsets.all(16);
 const _borderRadius = BorderRadius.only(
@@ -30,16 +30,28 @@ class DetailPage extends StatefulWidget {
   final Function close;
 
   @override
-  _DetailPageState createState() => _DetailPageState(item, close);
+  _DetailPageState createState() => _DetailPageState(item);
 }
 
 class _DetailPageState extends State<DetailPage> {
-  final Item item;
-  final Function close;
-
-  _DetailPageState(this.item, this.close);
+  _DetailPageState(Item item) {
+    _desc = item.desc;
+    _title = item.title;
+    _expiration = item.expiration;
+    _imgFile = item.img;
+  }
 
   File _imgFile;
+  String _desc;
+  String _title;
+  DateTime _expiration;
+
+  bool _itemNeedsUpdating() {
+    return (_imgFile != null) ||
+        (_desc != null && _desc != widget.item.desc) ||
+        (_title != widget.item.title) ||
+        (_expiration != null && _expiration != widget.item.expiration);
+  }
 
   void _setImageFile(File f) {
     setState(() {
@@ -47,29 +59,66 @@ class _DetailPageState extends State<DetailPage> {
     });
   }
 
-  Widget _photoSlot(BuildContext context) {
-    if (_imgFile != null) {
-      Image img = Image.file(_imgFile);
+  void _setDesc(String s) {
+    setState(() {
+      _desc = s == "" ? null : s;
+    });
+  }
+
+  void _setTitle(String s) {
+    setState(() {
+      _title = s == "" ? widget.item.title : s;
+    });
+  }
+
+  void _setExpiration(DateTime dt) {
+    setState(() {
+      _expiration = dt;
+    });
+  }
+
+  Widget _getDesc(BuildContext context) {
+    if (_desc != null) {
       return GestureDetector(
-          onLongPress: () {
-            _showPhotoDialog(context, _setImageFile, title: "Change Photo");
+          onLongPress: () async {
+            String desc = await _showDescriptionDialog(context, init: _desc);
+            _setDesc(desc);
           },
           child: Container(
-              decoration: BoxDecoration(
-                  borderRadius: _borderRadius,
-                  border: Border.all(color: Colors.white, width: 8)),
-              child: ClipRRect(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(0.0),
-                    topRight: Radius.circular(19.0),
-                    bottomLeft: Radius.circular(19.0),
-                    bottomRight: Radius.circular(19.0),
-                  ),
-                  child: img)));
+              padding: _padding,
+              decoration: _itemDecoration,
+              alignment: AlignmentDirectional(0.0, 0.0),
+              child: Text(_desc,
+                  style:
+                      TextStyle(fontSize: 25, fontWeight: FontWeight.w300))));
     } else {
-      return PhotoButton(
-          onPressed: () =>
-              _showPhotoDialog(context, _setImageFile, title: "Set Photo"));
+      return DescButton(onPressed: () async {
+        String desc = await _showDescriptionDialog(context);
+        _setDesc(desc);
+      });
+    }
+  }
+
+  List<Widget> _getButtons() {
+    if (_itemNeedsUpdating()) {
+      return [
+        PageButton("Cancel", isRed: true, onPressed: () {
+          widget.close();
+        }),
+        PageButton(
+          "Save",
+          onPressed: () async {
+//            await createNewItem(context);
+            widget.close();
+          },
+        )
+      ];
+    } else {
+      return [
+        PageButton("Home", onPressed: () {
+          widget.close();
+        }),
+      ];
     }
   }
 
@@ -77,42 +126,50 @@ class _DetailPageState extends State<DetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: PageTemplate(
-        color: item.color,
-        buttons: [
-          PageButton("Home", onPressed: () {
-            close();
-          }),
-        ],
+        color: getColorFromDate(_expiration),
+        buttons: _getButtons(),
         child: ListView(
           shrinkWrap: true,
           children: <Widget>[
             GestureDetector(
-                onLongPress: () {
-                  _showTitleDialog(context);
+                onLongPress: () async {
+                  String title = await _showTitleDialog(context, init: _title);
+                  if(title != null) {
+                    _setTitle(title);
+                  }
                 },
                 child: Row(children: <Widget>[
-                  Text(item.title,
-                      style: TextStyle(fontSize: 40, color: ItemColor.getFontColor(item.color)))
+                  Flexible(
+                      child: Text(_title,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 40,
+                              color:
+                                  ItemColor.getFontColor(widget.item.color))))
                 ])),
             const Divider(
               color: Colors.transparent,
               height: 8,
             ),
             GestureDetector(
-                onLongPress: () => {
-                      _showDateModal(context)
-                          .then((value) => log(value.toIso8601String()))
-                    },
+                onLongPress: () async {
+                  DateTime dt = await showDateModal(context, init: _expiration);
+                  _setExpiration(dt);
+                },
                 child: Container(
                   padding: _padding,
                   decoration: _itemDecoration,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      Text((item.isExpired)?"Expired ":"Expires ",
+                      Text(
+                          (isDateExpired(_expiration))
+                              ? "Expired "
+                              : "Expires ",
                           style: TextStyle(
                               fontSize: 25, fontWeight: FontWeight.w500)),
-                      Text(DateFormat("MMM d, yyyy").format(item.expiration),//"Jan 12, 2020"
+                      Text(DateFormat("MMM d, yyyy").format(_expiration),
+                          //"Jan 12, 2020"
                           style: TextStyle(
                               fontSize: 25, fontWeight: FontWeight.w300))
                     ],
@@ -122,23 +179,21 @@ class _DetailPageState extends State<DetailPage> {
               color: Colors.transparent,
               height: 16,
             ),
-            GestureDetector(
-                onLongPress: () {
-                  _showDescriptionDialog(context);
-                },
-                child: Container(
-                    padding: _padding,
-                    decoration: _itemDecoration,
-                    alignment: AlignmentDirectional(0.0, 0.0),
-                    child: Text(
-                        item.desc,
-                        style: TextStyle(
-                            fontSize: 25, fontWeight: FontWeight.w300)))),
+            _getDesc(context),
             const Divider(
               color: Colors.transparent,
               height: 16,
             ),
-            _photoSlot(context)
+            photoSlot(
+                context,
+                _imgFile,
+                _setImageFile,
+                _borderRadius,
+                BorderRadius.only(
+                    topLeft: Radius.circular(0.0),
+                    topRight: Radius.circular(19.0),
+                    bottomLeft: Radius.circular(19.0),
+                    bottomRight: Radius.circular(19.0)))
           ],
         ),
       ),
@@ -153,10 +208,36 @@ const _divider = const Divider(
 
 const _fontWeightText = FontWeight.w300;
 
-Future<void> _showDescriptionDialog(BuildContext context) async {
-  return showDialog<void>(
+Widget photoSlot(BuildContext context, File imgFile, setImageFile(File f),
+    BorderRadius containerRadius, BorderRadius imgRadius) {
+  if (imgFile != null) {
+    Image img = Image.file(imgFile);
+    return GestureDetector(
+        onLongPress: () {
+          showPhotoDialog(context, setImageFile, title: "Change Photo",
+              onDelete: () {
+            setImageFile(null);
+          });
+        },
+        child: Container(
+            decoration: BoxDecoration(
+                borderRadius: containerRadius,
+                border: Border.all(color: Colors.white, width: 8)),
+            child: ClipRRect(borderRadius: imgRadius, child: img)));
+  } else {
+    return PhotoButton(
+        onPressed: () =>
+            showPhotoDialog(context, setImageFile, title: "Set Photo"));
+  }
+}
+
+Future<String> _showDescriptionDialog(BuildContext context,
+    {String init}) async {
+  String str = await showDialog<String>(
     context: context,
     builder: (BuildContext context) {
+      final TextEditingController controller =
+          TextEditingController(text: init);
       return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: SimpleDialog(
@@ -168,10 +249,10 @@ Future<void> _showDescriptionDialog(BuildContext context) async {
               title: Text('Description'),
               children: <Widget>[
                 TextField(
-//                expands: true,
+                  maxLength: Item.maxDescChars,
+                  controller: controller,
                   minLines: 2,
                   maxLines: 8,
-//                maxLines:10,
                   cursorColor: ItemColor.blue,
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
@@ -195,67 +276,128 @@ Future<void> _showDescriptionDialog(BuildContext context) async {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    SmallerOutlinedButton("Cancel",
-                        isRed: true, onPressed: () {}),
-                    SmallerOutlinedButton("Save", onPressed: () {}),
+                    SmallerOutlinedButton("Cancel", isRed: true, onPressed: () {
+                      Navigator.pop(context, null);
+                    }),
+                    SmallerOutlinedButton("Save", onPressed: () {
+                      Navigator.pop(context, controller.text);
+                    }),
                   ],
                 )
               ]));
     },
   );
+  return str;
 }
 
-Future<void> _showTitleDialog(BuildContext context) async {
-  return showDialog<void>(
+class _TitleDialogContent extends StatefulWidget {
+  final String init;
+
+  const _TitleDialogContent({Key key, this.init}) : super(key: key);
+
+  @override
+  __TitleDialogContentState createState() => __TitleDialogContentState(init);
+}
+
+class __TitleDialogContentState extends State<_TitleDialogContent> {
+  TextEditingController controller;
+  int inputLength;
+  __TitleDialogContentState(String init) {
+    controller = TextEditingController(text: init);
+    inputLength = init?.length ?? 0;
+    controller.addListener(() {
+      setState((){
+        inputLength = controller.text.length;
+      });
+    });
+  }
+
+
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: SimpleDialog(
+            contentPadding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
+            titlePadding: EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(25)),
+            ),
+            title: Text('Title'),
+            children: <Widget>[
+              TextField(
+                maxLength: Item.maxTitleChars,
+                cursorColor: ItemColor.blue,
+                controller: controller,
+                decoration: InputDecoration(
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: ItemColor.darkGrey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: ItemColor.blue),
+                  ),
+                  contentPadding: EdgeInsets.all(12),
+                  border: InputBorder.none,
+                  hintText: "eg. Milk",
+                  hintStyle:
+                      const TextStyle(color: Color.fromRGBO(142, 142, 147, 1)),
+                ),
+                style: TextStyle(fontSize: 20, fontWeight: _fontWeightText),
+              ),
+              _divider,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  SmallerOutlinedButton("Cancel", isRed: true, onPressed: () {
+                    Navigator.pop(context);
+                  }),
+                  SmallerOutlinedButton("Save",
+                      disabled: (inputLength <= 0), onPressed: () {
+                    Navigator.pop(context, controller.text);
+                  }),
+                ],
+              )
+            ]));
+  }
+}
+
+Future<String> _showTitleDialog(BuildContext context, {String init}) async {
+  return showDialog<String>(
     context: context,
     builder: (BuildContext context) {
-      return BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: SimpleDialog(
-              contentPadding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
-              titlePadding: EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(25)),
-              ),
-              title: Text('Title'),
-              children: <Widget>[
-                TextField(
-                  cursorColor: ItemColor.blue,
-                  decoration: InputDecoration(
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      borderSide: BorderSide(color: ItemColor.darkGrey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      borderSide: BorderSide(color: ItemColor.blue),
-                    ),
-                    contentPadding: EdgeInsets.all(12),
-                    border: InputBorder.none,
-                    hintText: "eg. Milk",
-                    hintStyle: const TextStyle(
-                        color: Color.fromRGBO(142, 142, 147, 1)),
-                  ),
-                  style: TextStyle(fontSize: 20, fontWeight: _fontWeightText),
-                ),
-                _divider,
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    SmallerOutlinedButton("Cancel",
-                        isRed: true, onPressed: () {}),
-                    SmallerOutlinedButton("Save", onPressed: () {}),
-                  ],
-                )
-              ]));
+      return _TitleDialogContent(init:init);
     },
   );
 }
 
-Future<DateTime> _showDateModal(BuildContext context, {DateTime init}) async {
-  DateTime date = init == null ? DateTime.now() : init;
-  var pressedDone = await showCupertinoModalPopup<bool>(
+Future<DateTime> showDateModal(BuildContext context, {DateTime init}) async {
+  DateTime placeholderDate = clearTime(DateTime.now().add(Duration(days: 1)));
+//  DateTime placeholderDate = new DateTime(n.year, n.month,  n.day+1, 0,0,0,0,0);
+  DateTime date = (init == null) ? placeholderDate : init;
+  DateTime min;
+  DateTime start;
+  if (init == null) {
+    min = placeholderDate;
+    start = placeholderDate;
+  } else if (init.difference(placeholderDate).inDays < 0) {
+    min = init;
+    start = init;
+  } else {
+    min = placeholderDate;
+    start = init;
+  }
+
+  date = await showCupertinoModalPopup<DateTime>(
     context: context,
     builder: (context) => BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -279,7 +421,7 @@ Future<DateTime> _showDateModal(BuildContext context, {DateTime init}) async {
                         padding: const EdgeInsets.symmetric(
                             vertical: 8.0, horizontal: 16),
                         onPressed: () {
-                          Navigator.of(context).pop(true);
+                          Navigator.of(context).pop(date);
                         },
                         child: Text(
                           "Done",
@@ -290,6 +432,8 @@ Future<DateTime> _showDateModal(BuildContext context, {DateTime init}) async {
               ),
               Expanded(
                   child: CupertinoDatePicker(
+                initialDateTime: start,
+                minimumDate: min,
                 mode: CupertinoDatePickerMode.date,
                 onDateTimeChanged: (DateTime value) {
                   date = value;
@@ -299,33 +443,26 @@ Future<DateTime> _showDateModal(BuildContext context, {DateTime init}) async {
             ],
           ),
         )),
-//    filter: filter,
-//    useRootNavigator: useRootNavigator,
-//    semanticsDismissible: semanticsDismissible,
   );
-  if (pressedDone != null && init != null) {
-    return init;
-  } else {
-    return date;
-  }
+
+  return date;
 }
 
 class PhotoChild extends StatefulWidget {
   final Function(File f) onPhotoSet;
   final String title;
+  final Function onDelete;
 
-  PhotoChild(this.onPhotoSet, this.title);
+  PhotoChild(this.onPhotoSet, this.title, this.onDelete);
 
   @override
-  _PhotoChildState createState() => _PhotoChildState(onPhotoSet, title);
+  _PhotoChildState createState() => _PhotoChildState();
 }
 
 class _PhotoChildState extends State<PhotoChild> {
   File _imgFile;
-  final Function(File f) onPhotoSet;
-  final String title;
 
-  _PhotoChildState(this.onPhotoSet, this.title);
+  _PhotoChildState();
 
   void setImageFile(File f) {
     setState(() {
@@ -343,28 +480,43 @@ class _PhotoChildState extends State<PhotoChild> {
 
   List<Widget> _childrenWithoutImage() {
     return <Widget>[
-      PhotoSelectionButton("Take Photo ", onPressed: () {
+      PhotoSelectionButton("Take Photo ", onPressed: () async {
         setImageFromCamera();
+//        Navigator.pop(context);
       }),
       _divider,
-      PhotoSelectionButton("From Gallery", onPressed: () {
+      PhotoSelectionButton("From Gallery", onPressed: () async {
         setImageFromGallery();
+//        Navigator.pop(context);
       }),
       _divider,
       Row(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: (widget.onDelete != null)
+            ? MainAxisAlignment.spaceBetween
+            : MainAxisAlignment.start,
         children: <Widget>[
-          SmallerOutlinedButton("Cancel", isRed: true, onPressed: () {
-            Navigator.pop(context);
-          }),
+          ...(widget.onDelete != null)
+              ? [
+                  SmallerOutlinedButton("Cancel", onPressed: () {
+                    Navigator.pop(context);
+                  }),
+                  SmallerOutlinedButton("Delete", isRed: true, onPressed: () {
+                    widget.onDelete();
+                    Navigator.pop(context);
+                  }),
+                ]
+              : [
+                  SmallerOutlinedButton("Cancel", isRed: true, onPressed: () {
+                    Navigator.pop(context);
+                  })
+                ]
         ],
       ),
     ];
   }
 
   List<Widget> _childrenWithImage(File file) {
-    log(file?.path);
     return <Widget>[
       Image.file(file),
       _divider,
@@ -376,7 +528,7 @@ class _PhotoChildState extends State<PhotoChild> {
             Navigator.pop(context);
           }),
           SmallerOutlinedButton("Save", onPressed: () {
-            onPhotoSet(_imgFile);
+            widget.onPhotoSet(_imgFile);
             Navigator.pop(context);
           }),
         ],
@@ -398,19 +550,19 @@ class _PhotoChildState extends State<PhotoChild> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(25)),
         ),
-        title: Text(title),
+        title: Text(widget.title),
         children: getChildren());
   }
 }
 
-Future<void> _showPhotoDialog(BuildContext context, Function(File f) onPhotoSet,
-    {String title}) async {
-  return showDialog<void>(
+Future<void> showPhotoDialog(BuildContext context, Function(File f) onPhotoSet,
+    {String title, Function onDelete}) async {
+  showDialog<void>(
     context: context,
     builder: (BuildContext context) {
       return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: PhotoChild(onPhotoSet, title));
+          child: PhotoChild(onPhotoSet, title, onDelete));
     },
   );
 }

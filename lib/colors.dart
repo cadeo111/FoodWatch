@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'date_extension.dart';
-import 'model/ItemModel.dart';
+import 'model/ItemsModel.dart';
 
 class ItemColor {
   static const white = Color(0xffffffff);
@@ -27,7 +26,7 @@ class ItemColor {
 // expires in 7 days = yellow
 
 DateTime clearTime(DateTime dt) {
-  return new DateTime(dt.year, dt.month, dt.day);
+  return new DateTime(dt.year, dt.month, dt.day, 0, 0, 0, 0, 0);
 }
 
 

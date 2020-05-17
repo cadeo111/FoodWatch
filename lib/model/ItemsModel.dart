@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
@@ -19,6 +20,8 @@ class Item {
   final String _desc; //todo make sure < 300 char long
   final String id;
   final File img;
+  static get maxTitleChars => 13;
+  static get maxDescChars => 300;
 
   get color {
     return getColorFromDate(expiration);
@@ -68,7 +71,10 @@ class ItemsModel extends Model {
     return UnmodifiableListView(list);
   }
 
-  void add(Item item) => _items[item.id] = item;
+  void add(Item item) {
+    _items[item.id] = item;
+    notifyListeners();
+  }
 
   static ItemsModel of(BuildContext context) =>
       ScopedModel.of<ItemsModel>(context);
