@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:FoodWatch/colors.dart';
 import 'package:flutter/cupertino.dart';

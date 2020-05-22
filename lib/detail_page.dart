@@ -1,11 +1,9 @@
-import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:FoodWatch/colors.dart';
 import 'package:FoodWatch/page_template.dart';
-import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';

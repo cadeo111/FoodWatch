@@ -11,7 +11,6 @@ import 'package:scoped_model/scoped_model.dart';
 
 import 'buttons.dart';
 import 'colors.dart';
-import 'main.dart';
 
 
 class HomePage extends StatelessWidget {
