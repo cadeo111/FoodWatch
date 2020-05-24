@@ -1,4 +1,6 @@
 import 'dart:collection';
+import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
@@ -38,7 +40,7 @@ class Item {
 
   Item.fromMap(Map<String, dynamic> m)
       : this.title = m['title'],
-        this.expiration = m['expiration'],
+        this.expiration = DateTime.parse(m['expirationAsIso8601']),
         this.desc = m['desc'],
         this.id = m['id'],
         this.img = (m['imgUri'] == null) ? null : File.fromUri(m['imgUri']);
@@ -53,10 +55,10 @@ class Item {
     return 'Item{_title: $title, expiration: $expiration, _desc: $desc, id: $id, img: $img}';
   }
 
-  Map<String, dynamic> toJSONEncodable() {
+  Map<String, dynamic> toMap() {
     Map<String, dynamic> m = new Map();
     m['title'] = title;
-    m['expiration'] = expiration;
+    m['expirationAsIso8601'] = expiration.toIso8601String();
     m['desc'] = desc;
     m['id'] = id;
     m['imgUri'] = img?.uri;
@@ -77,9 +79,16 @@ class ItemsModel extends Model {
 
   ItemsModel.fromStorage() {
     Map<String, dynamic> items = storage.getItem('items');
-    items?.forEach((key, value) {
-      this._items[key] = value;
-    });
+    if (items != null) {
+      log("items");
+      log(new JsonEncoder.withIndent("    ").convert(items));
+      items?.forEach((key, value) {
+        this._items[key] = value;
+      });
+    } else {
+      log("items");
+      log("null");
+    }
   }
 
   UnmodifiableListView<Item> get items {
@@ -103,15 +112,18 @@ class ItemsModel extends Model {
   static ItemsModel of(BuildContext context) =>
       ScopedModel.of<ItemsModel>(context);
 
-  Map<String, dynamic> toJSONEncodable() {
-    Map<String, dynamic> m = new Map();
+  Map<String, Map<String, dynamic>> toMap() {
+    Map<String, Map<String, dynamic>> m = new Map();
     this._items.forEach((key, value) {
-      m[key] = value.toJSONEncodable();
+      m[key] = value.toMap();
     });
     return m;
   }
 
   void _saveModel() {
-    storage.setItem("items", this.toJSONEncodable());
+    storage.setItem("items", this.toString());
+    Map<String, dynamic> items = storage.getItem('items');
+    log("items after save");
+    log(new JsonEncoder.withIndent("    ").convert(items));
   }
 }
