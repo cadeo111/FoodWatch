@@ -1,11 +1,11 @@
 import 'dart:collection';
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
-import 'package:localstorage/localstorage.dart';
+import 'package:path/path.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
 import '../colors.dart';
@@ -15,6 +15,32 @@ var _uuid = Uuid();
 isDateExpired(DateTime expiration) =>
     expiration.difference(DateTime.now()).inDays <= 0 &&
     expiration.day != DateTime.now().day + 1;
+
+Future<Database> openMyDB() async {
+  return openDatabase(
+    // Set the path to the database. Note: Using the `join` function from the
+    // `path` package is best practice to ensure the path is correctly
+    // constructed for each platform.
+    join(await getDatabasesPath(), 'items_database.db'),
+    onCreate: (db, version) {
+      // Run the CREATE TABLE statement on the database.
+      return db.execute(
+        "CREATE TABLE IF NOT EXISTS items("
+        "id TEXT PRIMARY KEY, "
+        "title TEXT,"
+        "desc TEXT, "
+        "expirationAsIso8601 TEXT, "
+        "imgUri TEXT"
+        " )",
+      );
+    },
+    // Set the version. This executes the onCreate function and provides a
+    // path to perform database upgrades and downgrades.
+    version: 1,
+  );
+}
+
+final Future<Database> database = openMyDB();
 
 class Item {
   final String title; //todo make sure < 13 char long
@@ -64,12 +90,52 @@ class Item {
     m['imgUri'] = img?.uri;
     return m;
   }
+
+  Future<void> insertInDB() async {
+    // Get a reference to the database.
+    final Database db = await database;
+    // Insert the Dog into the correct table. You might also specify the
+    // `conflictAlgorithm` to use in case the same dog is inserted twice.
+    //
+    // In this case, replace any previous data.
+    await db.insert(
+      'items',
+      this.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> updateInDb() async {
+    // Get a reference to the database.
+    final db = await database;
+    // Update the given Dog.
+    await db.update(
+      'items',
+      this.toMap(),
+      // Ensure that the Dog has a matching id.
+      where: "id = ?",
+      // Pass the Dog's id as a whereArg to prevent SQL injection.
+      whereArgs: [this.id],
+    );
+  }
+
+  Future<void> deleteInDb() async {
+    // Get a reference to the database.
+    final db = await database;
+    // Remove the Dog from the Database.
+    await db.delete(
+      'items',
+      // Use a `where` clause to delete a specific dog.
+      where: "id = ?",
+      // Pass the Dog's id as a whereArg to prevent SQL injection.
+      whereArgs: [this.id],
+    );
+  }
 }
 
 class ItemsModel extends Model {
   final Map<String, Item> _items =
       new Map(); // most recent is the bottom of the list
-  final LocalStorage storage = new LocalStorage('foodwatch');
 
   ItemsModel({List<Item> items = const <Item>[]}) {
     items.forEach((i) {
@@ -77,18 +143,24 @@ class ItemsModel extends Model {
     });
   }
 
+  Future<List<Item>> getItemsFromDb() async {
+    // Get a reference to the database.
+    final Database db = await database;
+    // Query the table for all The Dogs.
+    final List<Map<String, dynamic>> maps = await db.query('items');
+    // Convert the List<Map<String, dynamic> into a List<Dog>.
+    return List.generate(maps.length, (i) {
+      return Item.fromMap(maps[i]);
+    });
+  }
+
   ItemsModel.fromStorage() {
-    Map<String, dynamic> items = storage.getItem('items');
-    if (items != null) {
-      log("items");
-      log(new JsonEncoder.withIndent("    ").convert(items));
-      items?.forEach((key, value) {
-        this._items[key] = value;
+    getItemsFromDb().then((list) {
+      list.forEach((item) {
+        _items[item.id] = item;
       });
-    } else {
-      log("items");
-      log("null");
-    }
+      notifyListeners();
+    });
   }
 
   UnmodifiableListView<Item> get items {
@@ -99,31 +171,17 @@ class ItemsModel extends Model {
 
   void add(Item item) {
     _items[item.id] = item;
+    item.insertInDB();
+    log(getItemsFromDb().toString());
     notifyListeners();
-    _saveModel();
   }
 
   void update(Item updated) {
     _items[updated.id] = updated;
+    updated.updateInDb();
     notifyListeners();
-    _saveModel();
   }
 
   static ItemsModel of(BuildContext context) =>
       ScopedModel.of<ItemsModel>(context);
-
-  Map<String, Map<String, dynamic>> toMap() {
-    Map<String, Map<String, dynamic>> m = new Map();
-    this._items.forEach((key, value) {
-      m[key] = value.toMap();
-    });
-    return m;
-  }
-
-  void _saveModel() {
-    storage.setItem("items", this.toString());
-    Map<String, dynamic> items = storage.getItem('items');
-    log("items after save");
-    log(new JsonEncoder.withIndent("    ").convert(items));
-  }
 }
