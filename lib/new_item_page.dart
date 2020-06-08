@@ -4,7 +4,9 @@ import 'dart:math';
 import 'package:FoodWatch/page_template.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+
 import 'buttons.dart';
 import 'colors.dart';
 import 'detail_page.dart';
@@ -32,7 +34,7 @@ copyImageToAppStorage(File imageFile) async {
   final String path = (await getApplicationDocumentsDirectory()).path;
 // copy the file to a new path
   String rand = (Random().nextDouble() * 1e10).toInt().toRadixString(16);
-  final File newImage = await imageFile.copy('$path/PIC_$rand.png');
+  final File newImage = await imageFile.copy(join(path, 'PIC_$rand.png'));
   return newImage;
 }
 
