@@ -11,7 +11,7 @@ import 'package:scoped_model/scoped_model.dart';
 
 import 'buttons.dart';
 import 'colors.dart';
-
+import 'custom_dismissable.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -151,6 +151,7 @@ class YearPill extends StatelessWidget {
 
 class ListItem extends StatelessWidget {
   final Item item;
+
   const ListItem({Key key, @required this.item}) : super(key: key);
 
   @override
@@ -177,52 +178,79 @@ class ListItem extends StatelessWidget {
       }
     }
 
-    return OpenContainer(
-      closedElevation: 0,
-      openElevation: 15.0,
-      openColor: bgColor,
-      closedColor: bgColor,
-      openShape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(30.0)),
-      ),
-      closedShape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(30.0)),
-      ),
-      transitionDuration: const Duration(milliseconds: 700),
-      transitionType: ContainerTransitionType.fade,
-      closedBuilder: (BuildContext context, void Function() action) {
-        return Container(
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                color: bgColor),
-            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16),
-            child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Flexible(
-                    flex: 1,
-                  child:Text(
-                    item.title,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.w300,
-                        color: fontColor),
-                  )),
-                  (boldYear)?pill:Text(monthDay,
-                      style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w200,
-                          color: fontColor))
-                ]));
-      },
-      openBuilder: (BuildContext context, void Function() action) {
-        return DetailPage(
-          item:item,
-          close:action,
-        );
-      },
-    );
+    return CustomDismissible(
+        onDismissed: (direction) {
+          ItemsModel.of(context).delete(item);
+        },
+        direction: DismissDirection.endToStart,
+        background: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Container(
+                padding: EdgeInsets.all(15.0),
+                decoration: new BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: ItemColor.red,
+                ),
+                child: Icon(
+                  Icons.delete,
+                  color: Colors.white,
+                  size: 36.0,
+                  semanticLabel: 'Text to announce in accessibility modes',
+                ))
+          ],
+        ),
+        key: Key(item.id),
+        child: OpenContainer(
+          closedElevation: 0,
+          openElevation: 15.0,
+          openColor: bgColor,
+          closedColor: bgColor,
+          openShape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(30.0)),
+          ),
+          closedShape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(30.0)),
+          ),
+          transitionDuration: const Duration(milliseconds: 700),
+          transitionType: ContainerTransitionType.fade,
+          closedBuilder: (BuildContext context, void Function() action) {
+            return Container(
+                clipBehavior: Clip.hardEdge,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                    color: bgColor),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16),
+                child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Flexible(
+                          flex: 1,
+                          child: Text(
+                            item.title,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.w300,
+                                color: fontColor),
+                          )),
+                      (boldYear)
+                          ? pill
+                          : Text(monthDay,
+                              style: TextStyle(
+                                  fontSize: 36,
+                                  fontWeight: FontWeight.w200,
+                                  color: fontColor))
+                    ]));
+          },
+          openBuilder: (BuildContext context, void Function() action) {
+            return DetailPage(
+              item: item,
+              close: action,
+            );
+          },
+        ));
   }
 }

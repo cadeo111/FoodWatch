@@ -182,6 +182,12 @@ class ItemsModel extends Model {
     notifyListeners();
   }
 
+  void delete(Item deleted) {
+    _items.remove(deleted.id);
+    deleted.deleteInDb();
+    notifyListeners();
+  }
+
   static ItemsModel of(BuildContext context) =>
       ScopedModel.of<ItemsModel>(context);
 }
