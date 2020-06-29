@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'buttons.dart';
 import 'colors.dart';
 import 'detail_page.dart';
+import 'main.dart';
 import 'model/ItemsModel.dart';
 
 const _padding = EdgeInsets.all(16);
@@ -90,6 +91,8 @@ class _NewItemPageState extends State<NewItemPage> {
         expiration: _expiration,
         desc: _desc,
         img: savedImageFile);
+    showNotification(
+        dateToShow: DateTime.now(), daysToExpire: 3, nameOfItem: _title);
     ItemsModel.of(context).add(item);
   }
 
