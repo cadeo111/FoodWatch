@@ -99,6 +99,7 @@ class _NewItemPageState extends State<NewItemPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: PageTemplate(
           color: getColorFromDate(_expiration),
           buttons: [
