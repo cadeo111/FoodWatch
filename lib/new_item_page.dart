@@ -10,8 +10,8 @@ import 'package:path_provider/path_provider.dart';
 import 'buttons.dart';
 import 'colors.dart';
 import 'detail_page.dart';
-import 'main.dart';
 import 'model/ItemsModel.dart';
+import 'notifications.dart';
 
 const _padding = EdgeInsets.all(16);
 const _itemDecoration = BoxDecoration(
