@@ -164,6 +164,7 @@ class CustomDismissible extends StatefulWidget {
   _CustomDismissibleState createState() => _CustomDismissibleState();
 }
 
+// ignore: unused_element
 class _DismissibleClipper extends CustomClipper<Rect> {
   _DismissibleClipper({
     @required this.axis,

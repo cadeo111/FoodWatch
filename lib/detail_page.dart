@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:FoodWatch/colors.dart';
 import 'package:FoodWatch/page_template.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,7 +13,6 @@ import 'package:intl/intl.dart';
 import 'buttons.dart';
 import 'model/ItemsModel.dart';
 import 'new_item_page.dart';
-import 'package:collection/collection.dart';
 
 const _padding = EdgeInsets.all(16);
 const _borderRadius = BorderRadius.only(
@@ -58,6 +58,7 @@ class _DetailPageState extends State<DetailPage> {
     }
     Item item = Item.withId(
         id: widget.item.id,
+        notificationId: widget.item.notificationId,
         title: _title,
         expiration: _expiration,
         desc: _desc,

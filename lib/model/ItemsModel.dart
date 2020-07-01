@@ -1,6 +1,7 @@
 import 'dart:collection';
-import 'dart:developer';
+import 'dart:developer' as developer;
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
@@ -11,6 +12,11 @@ import 'package:uuid/uuid.dart';
 import '../colors.dart';
 
 var _uuid = Uuid();
+
+int getNotificationId() {
+  final rng = new Random();
+  return rng.nextInt(10000) * 10;
+}
 
 isDateExpired(DateTime expiration) =>
     expiration.difference(DateTime.now()).inDays <= 0 &&
@@ -29,8 +35,9 @@ Future<Database> openMyDB() async {
         "id TEXT PRIMARY KEY, "
         "title TEXT,"
         "desc TEXT, "
+        "notificationId INT, "
         "expirationAsIso8601 TEXT, "
-        "imgUri TEXT"
+        "imgPath TEXT"
         " )",
       );
     },
@@ -47,6 +54,7 @@ class Item {
   final DateTime expiration;
   final String desc; //todo make sure < 300 char long
   final String id;
+  final int notificationId;
   final File img;
 
   static get maxTitleChars => 13;
@@ -60,16 +68,24 @@ class Item {
   get isExpired => isDateExpired(this.expiration);
 
   Item({@required this.title, @required this.expiration, this.desc, this.img})
-      : this.id = _uuid.v1();
+      : this.id = _uuid.v1(),
+        this.notificationId = getNotificationId();
 
-  Item.withId({this.title, this.expiration, this.desc, this.id, this.img});
+  Item.withId(
+      {this.notificationId,
+      this.title,
+      this.expiration,
+      this.desc,
+      this.id,
+      this.img});
 
   Item.fromMap(Map<String, dynamic> m)
       : this.title = m['title'],
+        this.notificationId = m['notificationId'],
         this.expiration = DateTime.parse(m['expirationAsIso8601']),
         this.desc = m['desc'],
         this.id = m['id'],
-        this.img = (m['imgUri'] == null) ? null : File.fromUri(m['imgUri']);
+        this.img = (m['imgPath'] == null) ? null : File(m['imgPath']);
 
   bool operator ==(other) => other is Item && id == other.id;
 
@@ -84,10 +100,12 @@ class Item {
   Map<String, dynamic> toMap() {
     Map<String, dynamic> m = new Map();
     m['title'] = title;
+    m['notificationId'] = notificationId;
     m['expirationAsIso8601'] = expiration.toIso8601String();
     m['desc'] = desc;
     m['id'] = id;
-    m['imgUri'] = img?.uri;
+    m['imgPath'] = img?.path;
+    developer.log(m['imgPath'], name: "path");
     return m;
   }
 
@@ -172,7 +190,6 @@ class ItemsModel extends Model {
   void add(Item item) {
     _items[item.id] = item;
     item.insertInDB();
-    log(getItemsFromDb().toString());
     notifyListeners();
   }
 

@@ -91,8 +91,7 @@ class _NewItemPageState extends State<NewItemPage> {
         expiration: _expiration,
         desc: _desc,
         img: savedImageFile);
-    showNotification(
-        dateToShow: DateTime.now(), daysToExpire: 3, nameOfItem: _title);
+    await createNotificationsForItem(item);
     ItemsModel.of(context).add(item);
   }
 

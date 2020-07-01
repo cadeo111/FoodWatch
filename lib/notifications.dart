@@ -1,9 +1,10 @@
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart';
 import 'package:rxdart/subjects.dart';
+
+import 'model/ItemsModel.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -110,7 +111,10 @@ void configureSelectNotificationSubject(
 }
 
 Future<void> scheduleNotification(
-    {DateTime dateToShow, String nameOfItem, int daysToExpire}) async {
+    {@required int id,
+    @required DateTime dateToShow,
+    @required String nameOfItem,
+    @required int daysToExpire}) async {
   final DateTime now = dateToShow;
   final scheduledNotificationDateTime =
       DateTime(now.year, now.month, now.day, 9);
@@ -121,18 +125,19 @@ Future<void> scheduleNotification(
   final iOSPlatformChannelSpecifics = IOSNotificationDetails();
   final platformChannelSpecifics = NotificationDetails(
       androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-  final rng = new Random();
-  final id = rng.nextInt(100);
   await flutterLocalNotificationsPlugin.schedule(
       id,
-      '$nameOfItem expires in $daysToExpire days',
+      (daysToExpire != 0)
+          ? '$nameOfItem expires in $daysToExpire days'
+          : "$nameOfItem expires today",
       null,
       scheduledNotificationDateTime,
       platformChannelSpecifics);
 }
 
 Future<void> showNotification(
-    {@required DateTime dateToShow,
+    {@required id,
+    @required DateTime dateToShow,
     @required String nameOfItem,
     @required int daysToExpire}) async {
   var androidPlatformChannelSpecifics = AndroidNotificationDetails(
@@ -143,11 +148,46 @@ Future<void> showNotification(
   var iOSPlatformChannelSpecifics = IOSNotificationDetails();
   var platformChannelSpecifics = NotificationDetails(
       androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-  final rng = new Random();
-  final id = rng.nextInt(10000);
   await flutterLocalNotificationsPlugin.show(
       id,
-      '$nameOfItem expires in $daysToExpire days',
-      null,
+      (daysToExpire != 0)
+          ? '$nameOfItem expires in $daysToExpire days'
+          : "$nameOfItem expires today",
+      "dts:${new DateFormat.yMd().add_jm().format(dateToShow)} id:$id",
       platformChannelSpecifics);
+}
+
+Future<void> createNotificationsForItem(Item i) async {
+  final int notifId = i.notificationId;
+  final DateTime expiration = i.expiration;
+  final name = i.title;
+
+  final DateTime day7expiration = expiration.subtract(Duration(days: 7));
+  final DateTime day3expiration = expiration.subtract(Duration(days: 3));
+
+  final DateTime timeToShow = DateTime(0, 0, 0, 8, 30);
+
+  //7 day notification
+  await showNotification(
+      id: notifId + 1,
+      dateToShow: DateTime(day7expiration.year, day7expiration.month,
+          day7expiration.day, timeToShow.hour, timeToShow.minute),
+      nameOfItem: name,
+      daysToExpire: 7);
+
+  //3 day notification
+  await showNotification(
+      id: notifId + 2,
+      dateToShow: DateTime(day3expiration.year, day3expiration.month,
+          day3expiration.day, timeToShow.hour, timeToShow.minute),
+      nameOfItem: name,
+      daysToExpire: 3);
+
+  //day of expiration notification
+  await showNotification(
+      id: notifId + 3,
+      dateToShow: DateTime(expiration.year, expiration.month, expiration.day,
+          timeToShow.hour, timeToShow.minute),
+      nameOfItem: name,
+      daysToExpire: 0);
 }

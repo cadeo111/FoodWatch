@@ -17,6 +17,7 @@ class PageTemplate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+        height: double.infinity,
         color: Color(0xFF92AAFF),
         child: Column(
           children: <Widget>[
@@ -51,5 +52,3 @@ class PageTemplate extends StatelessWidget {
         ));
   }
 }
-
-
