@@ -9,8 +9,6 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
-import '../colors.dart';
-
 var _uuid = Uuid();
 
 int getNotificationId() {
@@ -60,10 +58,6 @@ class Item {
   static get maxTitleChars => 13;
 
   static get maxDescChars => 300;
-
-  get color {
-    return getColorFromDate(expiration);
-  }
 
   get isExpired => isDateExpired(this.expiration);
 

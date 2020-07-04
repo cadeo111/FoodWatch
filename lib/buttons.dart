@@ -1,4 +1,3 @@
-
 import 'package:FoodWatch/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +16,8 @@ class NewItemPropButton extends StatelessWidget {
   final Function onPressed;
   final String text;
 
-  NewItemPropButton(this.text, {
+  NewItemPropButton(
+    this.text, {
     Key key,
     @required this.onPressed,
   }) : super(key: key);
@@ -54,9 +54,9 @@ class PageButton extends StatelessWidget {
 
   PageButton(this.text,
       {Key key,
-        this.isRed = false,
-        @required Function onPressed,
-        this.disabled: false})
+      this.isRed = false,
+      @required Function onPressed,
+      this.disabled: false})
       : this.onPressed = (disabled) ? null : onPressed,
         super(key: key);
 
@@ -142,23 +142,28 @@ class SmallerOutlinedButton extends StatelessWidget {
       onPressed: onPressed,
       child: Text(text,
           style: TextStyle(
-              fontSize: 20,
-              fontFamily: "Roboto",
-              fontWeight: FontWeight.w300)),
+              fontSize: 20, fontFamily: "Roboto", fontWeight: FontWeight.w300)),
     );
   }
 }
 
 class DummyPageButton extends StatelessWidget {
   final String text;
-  final bool isRed;
 
-  DummyPageButton(this.text, {Key key, this.isRed = false}) : super(key: key);
+  DummyPageButton(this.text, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor = Colors.white;
-    Color textColor = (isRed) ? Color(0xffFF8F8C) : Color(0xff92AAFF);
+    Color bgColor = (isDarkmode(context))
+        ? ItemColorDark.buttonOnDarkGrey
+        : ItemColor.white;
+
+    Color textColor;
+    if (isDarkmode(context)) {
+      textColor = ItemColorDark.getFontColor(ItemColorDark.buttonOnDarkGrey);
+    } else {
+      textColor = ItemColor.periwinkle;
+    }
     return Container(
       decoration: BoxDecoration(
         color: bgColor,

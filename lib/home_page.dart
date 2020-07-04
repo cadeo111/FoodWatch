@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:developer';
 
 import 'package:FoodWatch/detail_page.dart';
 import 'package:FoodWatch/model/ItemsModel.dart';
@@ -20,7 +21,9 @@ class HomePage extends StatelessWidget {
       body: PageTemplate(
         buttons: [
           OpenContainer(
-              closedColor: Colors.white,
+              closedColor: (isDarkmode(context))
+                  ? ItemColorDark.buttonOnDarkGrey
+                  : ItemColor.white,
               openColor: ItemColor.grey,
               closedElevation: 0,
               openElevation: 15.0,
@@ -81,7 +84,8 @@ class CustomSearchBar extends StatelessWidget {
           )
         ],
         borderRadius: const BorderRadius.all(Radius.circular(50)),
-        color: Color(0xffF2F2F2),
+        color:
+            (isDarkmode(context)) ? ItemColorDark.searchGrey : ItemColor.grey,
       ),
       height: 80,
       padding: const EdgeInsets.fromLTRB(24.0, 8.0, 5.0, 5.0),
@@ -93,7 +97,10 @@ class CustomSearchBar extends StatelessWidget {
           hintText: "Search",
           hintStyle: const TextStyle(color: Color.fromRGBO(142, 142, 147, 1)),
         ),
-        style: TextStyle(fontSize: 35, fontWeight: FontWeight.w300),
+        style: TextStyle(
+            fontSize: 35,
+            fontWeight: FontWeight.w300,
+            color: (isDarkmode(context)) ? ItemColorDark.white : null),
       ),
     );
   }
@@ -114,23 +121,35 @@ class YearPill extends StatelessWidget {
     Color borderColor;
     if (bold) {
       if (white) {
-        bgColor = Colors.white;
-        borderColor = Colors.white;
-        textColor = Colors.black;
+        bgColor = (isDarkmode(context)) ? ItemColorDark.white : ItemColor.white;
+        borderColor = (isDarkmode(context))
+            ? ItemColorDark.fontColorGrey
+            : ItemColor.white;
+        textColor =
+            (isDarkmode(context)) ? ItemColorDark.black : ItemColor.black;
       } else {
-        bgColor = Colors.black;
-        borderColor = Colors.black;
-        textColor = Colors.white;
+        bgColor = (isDarkmode(context)) ? ItemColorDark.black : ItemColor.black;
+        borderColor =
+            (isDarkmode(context)) ? ItemColorDark.black : ItemColor.black;
+        textColor = (isDarkmode(context))
+            ? ItemColorDark.fontColorGrey
+            : ItemColor.white;
       }
     } else {
       if (white) {
         bgColor = Colors.transparent;
-        borderColor = Colors.white;
-        textColor = Colors.white;
+        borderColor = (isDarkmode(context))
+            ? ItemColorDark.fontColorGrey
+            : ItemColor.white;
+        textColor = (isDarkmode(context))
+            ? ItemColorDark.fontColorGrey
+            : ItemColor.white;
       } else {
         bgColor = Colors.transparent;
-        borderColor = Colors.black;
-        textColor = Colors.black;
+        borderColor =
+            (isDarkmode(context)) ? ItemColorDark.black : ItemColor.black;
+        textColor =
+            (isDarkmode(context)) ? ItemColorDark.black : ItemColor.black;
       }
     }
 
@@ -157,9 +176,13 @@ class ListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String monthDay = (new DateFormat('MMMd')).format(item.expiration);
-    Color color = getColorFromDate(item.expiration);
+    Color color =
+        getColorFromDate(item.expiration, darkMode: isDarkmode(context));
+    log("color: $color");
     Color bgColor = color;
-    Color fontColor = ItemColor.getFontColor(color);
+    Color fontColor = (isDarkmode(context))
+        ? ItemColorDark.getFontColor(color)
+        : ItemColor.getFontColor(color);
 
     int year = item.expiration.year;
     bool boldYear = item.expiration.difference(DateTime.now()).inDays > 365;

@@ -8,17 +8,19 @@ class PageTemplate extends StatelessWidget {
   final Color color;
 
   const PageTemplate(
-      {Key key,
-      @required this.buttons,
-      @required this.child,
-      this.color = ItemColor.white})
+      {Key key, @required this.buttons, @required this.child, this.color})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final Color defaultColor =
+        (isDarkmode(context)) ? ItemColorDark.black : ItemColor.white;
+    final Color realColor = color ?? defaultColor;
     return Container(
         height: double.infinity,
-        color: Color(0xFF92AAFF),
+        color: (isDarkmode(context))
+            ? ItemColorDark.darkGrey
+            : ItemColor.periwinkle,
         child: Column(
           children: <Widget>[
             Expanded(
@@ -38,7 +40,7 @@ class PageTemplate extends StatelessWidget {
                       ],
                       borderRadius:
                           BorderRadius.vertical(bottom: Radius.circular(25.0)),
-                      color: color),
+                      color: realColor),
                 )),
             Expanded(
               flex: 1,

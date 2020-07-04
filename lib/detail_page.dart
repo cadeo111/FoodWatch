@@ -191,8 +191,8 @@ class _DetailPageState extends State<DetailPage> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                               fontSize: 40,
-                              color:
-                                  ItemColor.getFontColor(widget.item.color))))
+                              color: ItemColor.getFontColor(
+                                  getColorFromDate(_expiration)))))
                 ])),
             const Divider(
               color: Colors.transparent,
