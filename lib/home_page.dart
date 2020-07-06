@@ -212,11 +212,14 @@ class ListItem extends StatelessWidget {
                 padding: EdgeInsets.all(15.0),
                 decoration: new BoxDecoration(
                   shape: BoxShape.circle,
-                  color: ItemColor.red,
+                  color:
+                      (isDarkmode(context)) ? ItemColorDark.red : ItemColor.red,
                 ),
                 child: Icon(
                   Icons.delete,
-                  color: Colors.white,
+                  color: (isDarkmode(context))
+                      ? ItemColorDark.fontColorGrey
+                      : ItemColor.white,
                   size: 36.0,
                   semanticLabel: 'Text to announce in accessibility modes',
                 ))
