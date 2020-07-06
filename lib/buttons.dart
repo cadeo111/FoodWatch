@@ -160,8 +160,7 @@ class SmallerButton extends StatelessWidget {
       disabledBgColor = ItemColorDark.darkDarkGrey;
       disabledTextColor = textColor;
     } else {
-      disabledTextColor = ItemColor.darkGrey;
-
+      disabledTextColor = disabledTextColor;
       bgColor = ItemColor.white;
       textColor = (isRed) ? Color(0xffFF8F8C) : Color(0xff92AAFF);
       borderColor = (disabled) ? ItemColor.darkGrey : textColor;

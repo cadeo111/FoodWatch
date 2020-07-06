@@ -7,15 +7,34 @@ import 'package:FoodWatch/page_template.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:scoped_model/scoped_model.dart';
 
 import 'buttons.dart';
 import 'colors.dart';
 import 'custom_dismissable.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String searchStr = "";
+  void setSearchStr(String str) => setState(() {
+        searchStr = str;
+      });
+
   @override
   Widget build(BuildContext context) {
+    final ItemsModel model = ItemsModel.of(context);
+    final List<Item> items =
+        UnmodifiableListView(model.items.where((Item item) {
+      final inDesc = item.desc?.contains(searchStr) ?? false;
+      final inTitle = item.title.contains(searchStr);
+      final inDateStr = DateFormat('EEEE MMMM d yyyy')
+          .format(item.expiration)
+          .contains(searchStr);
+      return inTitle || inDateStr || inDesc;
+    }));
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: PageTemplate(
@@ -44,8 +63,10 @@ class HomePage extends StatelessWidget {
         ],
         child: Stack(
           children: <Widget>[
-            ScopedModelDescendant<ItemsModel>(builder: _listOfItems),
-            CustomSearchBar()
+            _listOfItems(context, items),
+            CustomSearchBar(
+              setSearchStr: setSearchStr,
+            )
           ],
         ),
       ),
@@ -53,9 +74,7 @@ class HomePage extends StatelessWidget {
   }
 }
 
-ListView _listOfItems(
-    BuildContext context, Widget child, ItemsModel itemsModel) {
-  UnmodifiableListView<Item> items = itemsModel.items;
+ListView _listOfItems(BuildContext context, UnmodifiableListView<Item> items) {
   return ListView.separated(
     padding: EdgeInsets.only(top: 100),
     itemCount: items.length,
@@ -70,7 +89,40 @@ ListView _listOfItems(
   );
 }
 
-class CustomSearchBar extends StatelessWidget {
+class CustomSearchBar extends StatefulWidget {
+  final void Function(String str) setSearchStr;
+
+  @override
+  const CustomSearchBar({Key key, @required this.setSearchStr})
+      : super(key: key);
+
+  @override
+  _CustomSearchBarState createState() => _CustomSearchBarState(setSearchStr);
+}
+
+class _CustomSearchBarState extends State<CustomSearchBar> {
+  final void Function(String str) setSearchStr;
+  TextEditingController controller;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  _CustomSearchBarState(this.setSearchStr) {
+    controller = TextEditingController(text: "");
+    controller.addListener(() {
+      setSearchStr(controller.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -91,6 +143,7 @@ class CustomSearchBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24.0, 8.0, 5.0, 5.0),
       alignment: Alignment.center,
       child: TextField(
+        controller: controller,
         decoration: InputDecoration(
           icon: Icon(Icons.search, size: 42),
           border: InputBorder.none,
