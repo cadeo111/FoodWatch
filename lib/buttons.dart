@@ -132,13 +132,13 @@ class PhotoSelectionButton extends StatelessWidget {
   }
 }
 
-class SmallerOutlinedButton extends StatelessWidget {
+class SmallerButton extends StatelessWidget {
   final String text;
   final bool isRed;
   final Function onPressed;
   final bool disabled;
 
-  SmallerOutlinedButton(this.text,
+  SmallerButton(this.text,
       {Key key, this.isRed = false, @required onPressed, this.disabled = false})
       : this.onPressed = (disabled) ? null : onPressed,
         super(key: key);
@@ -148,20 +148,29 @@ class SmallerOutlinedButton extends StatelessWidget {
     Color bgColor;
     Color textColor;
     Color borderColor;
+    Color disabledBgColor;
+    Color disabledTextColor;
+
     if (isDarkmode(context)) {
       bgColor = (isRed)
           ? ItemColorDark.buttonSecondaryOnDarkGrey
           : ItemColorDark.buttonOnDarkGrey;
       textColor = ItemColorDark.white;
-      borderColor = bgColor;
+      borderColor = (disabled) ? ItemColorDark.darkDarkGrey : bgColor;
+      disabledBgColor = ItemColorDark.darkDarkGrey;
+      disabledTextColor = textColor;
     } else {
+      disabledTextColor = ItemColor.darkGrey;
+
       bgColor = ItemColor.white;
       textColor = (isRed) ? Color(0xffFF8F8C) : Color(0xff92AAFF);
       borderColor = (disabled) ? ItemColor.darkGrey : textColor;
+      disabledBgColor = null;
     }
 
     return FlatButton(
       disabledTextColor: ItemColor.darkGrey,
+      disabledColor: disabledBgColor,
       textColor: textColor,
       shape: RoundedRectangleBorder(
         side: BorderSide(width: 1.0, color: borderColor),

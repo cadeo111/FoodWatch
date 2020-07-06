@@ -21,8 +21,9 @@ const _borderRadius = BorderRadius.only(
   bottomLeft: Radius.circular(25.0),
   bottomRight: Radius.circular(25.0),
 );
-const _itemDecoration =
-    BoxDecoration(borderRadius: _borderRadius, color: ItemColor.white);
+
+BoxDecoration _itemDecoration(Color color) =>
+    BoxDecoration(borderRadius: _borderRadius, color: color);
 
 class DetailPage extends StatefulWidget {
   const DetailPage({@required this.close, Key key, this.item})
@@ -124,7 +125,8 @@ class _DetailPageState extends State<DetailPage> {
     });
   }
 
-  Widget _getDesc(BuildContext context) {
+  Widget _getDesc(BuildContext context, Color textBoxBackgroundColor,
+      Color textBoxTextColor) {
     if (_desc != null) {
       return GestureDetector(
           onLongPress: () async {
@@ -133,11 +135,13 @@ class _DetailPageState extends State<DetailPage> {
           },
           child: Container(
               padding: _padding,
-              decoration: _itemDecoration,
+              decoration: _itemDecoration(textBoxBackgroundColor),
               alignment: AlignmentDirectional(0.0, 0.0),
               child: Text(_desc,
-                  style:
-                      TextStyle(fontSize: 25, fontWeight: FontWeight.w300))));
+                  style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w300,
+                      color: textBoxTextColor))));
     } else {
       return DescButton(onPressed: () async {
         String desc = await _showDescriptionDialog(context);
@@ -171,9 +175,23 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    Color pageColor;
+    Color textBoxBackgroundColor;
+    Color textBoxTextColor;
+    if (isDarkmode(context)) {
+      pageColor = ItemColorDark.black;
+      textBoxBackgroundColor = getColorFromDate(_expiration, darkMode: true);
+      textBoxTextColor = ItemColorDark.getFontColor(textBoxBackgroundColor);
+    } else {
+      pageColor = getColorFromDate(_expiration);
+      textBoxBackgroundColor = ItemColor.white;
+      textBoxTextColor = ItemColor.getFontColor(textBoxBackgroundColor);
+    }
+
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: PageTemplate(
-        color: getColorFromDate(_expiration),
+        color: pageColor,
         buttons: _getButtons(),
         child: ListView(
           shrinkWrap: false,
@@ -189,10 +207,8 @@ class _DetailPageState extends State<DetailPage> {
                   Flexible(
                       child: Text(_title,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontSize: 40,
-                              color: ItemColor.getFontColor(
-                                  getColorFromDate(_expiration)))))
+                          style:
+                              TextStyle(fontSize: 40, color: textBoxTextColor)))
                 ])),
             const Divider(
               color: Colors.transparent,
@@ -205,7 +221,7 @@ class _DetailPageState extends State<DetailPage> {
                 },
                 child: Container(
                   padding: _padding,
-                  decoration: _itemDecoration,
+                  decoration: _itemDecoration(textBoxBackgroundColor),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
@@ -214,11 +230,15 @@ class _DetailPageState extends State<DetailPage> {
                               ? "Expired "
                               : "Expires ",
                           style: TextStyle(
-                              fontSize: 25, fontWeight: FontWeight.w500)),
+                              fontSize: 25,
+                              fontWeight: FontWeight.w500,
+                              color: textBoxTextColor)),
                       Text(DateFormat("MMM d, yyyy").format(_expiration),
                           //"Jan 12, 2020"
                           style: TextStyle(
-                              fontSize: 25, fontWeight: FontWeight.w300))
+                              fontSize: 25,
+                              fontWeight: FontWeight.w300,
+                              color: textBoxTextColor))
                     ],
                   ),
                 )),
@@ -226,7 +246,7 @@ class _DetailPageState extends State<DetailPage> {
               color: Colors.transparent,
               height: 16,
             ),
-            _getDesc(context),
+            _getDesc(context, textBoxBackgroundColor, textBoxTextColor),
             const Divider(
               color: Colors.transparent,
               height: 16,
@@ -240,7 +260,8 @@ class _DetailPageState extends State<DetailPage> {
                     topLeft: Radius.circular(0.0),
                     topRight: Radius.circular(19.0),
                     bottomLeft: Radius.circular(19.0),
-                    bottomRight: Radius.circular(19.0))),
+                    bottomRight: Radius.circular(19.0)),
+                borderColor: textBoxBackgroundColor),
             const Divider(
               color: Colors.transparent,
               height: 16,
@@ -260,7 +281,8 @@ const _divider = const Divider(
 const _fontWeightText = FontWeight.w300;
 
 Widget photoSlot(BuildContext context, File imgFile, setImageFile(File f),
-    BorderRadius containerRadius, BorderRadius imgRadius) {
+    BorderRadius containerRadius, BorderRadius imgRadius,
+    {@required Color borderColor}) {
   if (imgFile != null) {
     Image img = Image.file(imgFile);
     return GestureDetector(
@@ -273,7 +295,7 @@ Widget photoSlot(BuildContext context, File imgFile, setImageFile(File f),
         child: Container(
             decoration: BoxDecoration(
                 borderRadius: containerRadius,
-                border: Border.all(color: Colors.white, width: 8)),
+                border: Border.all(color: borderColor, width: 8)),
             child: ClipRRect(borderRadius: imgRadius, child: img)));
   } else {
     return PhotoButton(
@@ -289,15 +311,32 @@ Future<String> _showDescriptionDialog(BuildContext context,
     builder: (BuildContext context) {
       final TextEditingController controller =
           TextEditingController(text: init);
+      Color textColor;
+      Color backgroundColor;
+      Color hintText;
+      if (isDarkmode(context)) {
+        backgroundColor = ItemColorDark.darkGrey;
+        textColor = ItemColorDark.getFontColor(backgroundColor);
+        hintText = ItemColorDark.hintText;
+      } else {
+        backgroundColor = ItemColor.white;
+        ItemColorDark.getFontColor(textColor);
+        hintText = ItemColor.hintText;
+      }
+
       return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: SimpleDialog(
+              backgroundColor: backgroundColor,
               contentPadding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
               titlePadding: EdgeInsets.all(16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(25)),
               ),
-              title: Text('Description'),
+              title: Text(
+                'Description',
+                style: TextStyle(color: textColor),
+              ),
               children: <Widget>[
                 TextField(
                   maxLength: Item.maxDescChars,
@@ -306,6 +345,7 @@ Future<String> _showDescriptionDialog(BuildContext context,
                   maxLines: 8,
                   cursorColor: ItemColor.blue,
                   decoration: InputDecoration(
+                    counterStyle: TextStyle(color: textColor),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10.0)),
                       borderSide: BorderSide(color: ItemColor.darkGrey),
@@ -317,20 +357,22 @@ Future<String> _showDescriptionDialog(BuildContext context,
                     contentPadding: EdgeInsets.all(12),
                     border: InputBorder.none,
                     hintText: "eg. Organic Milk from costco, 3 containers",
-                    hintStyle: const TextStyle(
-                        color: Color.fromRGBO(142, 142, 147, 1)),
+                    hintStyle: TextStyle(color: hintText),
                   ),
-                  style: TextStyle(fontSize: 20, fontWeight: _fontWeightText),
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: _fontWeightText,
+                      color: textColor),
                 ),
                 _divider,
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    SmallerOutlinedButton("Cancel", isRed: true, onPressed: () {
+                    SmallerButton("Cancel", isRed: true, onPressed: () {
                       Navigator.pop(context, null);
                     }),
-                    SmallerOutlinedButton("Save", onPressed: () {
+                    SmallerButton("Save", onPressed: () {
                       Navigator.pop(context, controller.text);
                     }),
                   ],
@@ -372,21 +414,38 @@ class __TitleDialogContentState extends State<_TitleDialogContent> {
 
   @override
   Widget build(BuildContext context) {
+    Color textColor;
+    Color backgroundColor;
+    Color hintText;
+    if (isDarkmode(context)) {
+      backgroundColor = ItemColorDark.darkGrey;
+      textColor = ItemColorDark.getFontColor(backgroundColor);
+      hintText = ItemColorDark.hintText;
+    } else {
+      backgroundColor = ItemColor.white;
+      ItemColorDark.getFontColor(textColor);
+      hintText = ItemColor.hintText;
+    }
     return BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: SimpleDialog(
+            backgroundColor: backgroundColor,
             contentPadding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
             titlePadding: EdgeInsets.all(16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(25)),
             ),
-            title: Text('Title'),
+            title: Text(
+              'Title',
+              style: TextStyle(color: textColor),
+            ),
             children: <Widget>[
               TextField(
                 maxLength: Item.maxTitleChars,
                 cursorColor: ItemColor.blue,
                 controller: controller,
                 decoration: InputDecoration(
+                  counterStyle: TextStyle(color: textColor),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide: BorderSide(color: ItemColor.darkGrey),
@@ -398,20 +457,22 @@ class __TitleDialogContentState extends State<_TitleDialogContent> {
                   contentPadding: EdgeInsets.all(12),
                   border: InputBorder.none,
                   hintText: "eg. Milk",
-                  hintStyle:
-                      const TextStyle(color: Color.fromRGBO(142, 142, 147, 1)),
+                  hintStyle: TextStyle(color: hintText),
                 ),
-                style: TextStyle(fontSize: 20, fontWeight: _fontWeightText),
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: _fontWeightText,
+                    color: textColor),
               ),
               _divider,
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  SmallerOutlinedButton("Cancel", isRed: true, onPressed: () {
+                  SmallerButton("Cancel", isRed: true, onPressed: () {
                     Navigator.pop(context);
                   }),
-                  SmallerOutlinedButton("Save", disabled: (inputLength <= 0),
+                  SmallerButton("Save", disabled: (inputLength <= 0),
                       onPressed: () {
                     Navigator.pop(context, controller.text);
                   }),
@@ -560,16 +621,16 @@ class _PhotoChildState extends State<PhotoChild> {
         children: <Widget>[
           ...(widget.onDelete != null)
               ? [
-                  SmallerOutlinedButton("Cancel", onPressed: () {
+                  SmallerButton("Cancel", onPressed: () {
                     Navigator.pop(context);
                   }),
-                  SmallerOutlinedButton("Delete", isRed: true, onPressed: () {
+                  SmallerButton("Delete", isRed: true, onPressed: () {
                     widget.onDelete();
                     Navigator.pop(context);
                   }),
                 ]
               : [
-                  SmallerOutlinedButton("Cancel", isRed: true, onPressed: () {
+                  SmallerButton("Cancel", isRed: true, onPressed: () {
                     Navigator.pop(context);
                   })
                 ]
@@ -586,10 +647,10 @@ class _PhotoChildState extends State<PhotoChild> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          SmallerOutlinedButton("Cancel", isRed: true, onPressed: () {
+          SmallerButton("Cancel", isRed: true, onPressed: () {
             Navigator.pop(context);
           }),
-          SmallerOutlinedButton("Save", onPressed: () {
+          SmallerButton("Save", onPressed: () {
             widget.onPhotoSet(_imgFile);
             Navigator.pop(context);
           }),

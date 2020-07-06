@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:developer';
 
 import 'package:FoodWatch/detail_page.dart';
 import 'package:FoodWatch/model/ItemsModel.dart';
@@ -18,6 +17,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: PageTemplate(
         buttons: [
           OpenContainer(
@@ -178,7 +178,6 @@ class ListItem extends StatelessWidget {
     String monthDay = (new DateFormat('MMMd')).format(item.expiration);
     Color color =
         getColorFromDate(item.expiration, darkMode: isDarkmode(context));
-    log("color: $color");
     Color bgColor = color;
     Color fontColor = (isDarkmode(context))
         ? ItemColorDark.getFontColor(color)

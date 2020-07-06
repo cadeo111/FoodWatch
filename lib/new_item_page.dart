@@ -140,12 +140,18 @@ class _NewItemPageState extends State<NewItemPage> {
                     setDesc(input);
                   }),
               _divider,
-              photoSlot(context, _img, (File f) {
-                setState(() {
-                  _img = f;
-                });
-              }, BorderRadius.all(Radius.circular(30)),
-                  BorderRadius.all(Radius.circular(22)))
+              photoSlot(
+                context,
+                _img,
+                (File f) {
+                  setState(() {
+                    _img = f;
+                  });
+                },
+                BorderRadius.all(Radius.circular(30)),
+                BorderRadius.all(Radius.circular(22)),
+                borderColor: textBoxColor,
+              )
             ],
           )),
     );
@@ -199,8 +205,8 @@ class TitleInput extends StatelessWidget {
                   hintText: "eg. Milk",
                   hintStyle: TextStyle(
                       color: (isDarkmode(context)
-                          ? Color.fromRGBO(165, 165, 165, 1)
-                          : Color.fromRGBO(142, 142, 147, 1))),
+                          ? ItemColorDark.hintText
+                          : ItemColor.hintText)),
                 ),
                 style: TextStyle(
                     fontSize: 30,
@@ -221,9 +227,8 @@ class DescriptionInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color hintColor = (isDarkmode(context)
-        ? Color.fromRGBO(165, 165, 165, 1)
-        : Color.fromRGBO(142, 142, 147, 1));
+    final Color hintColor =
+        (isDarkmode(context) ? ItemColorDark.hintText : ItemColor.hintText);
     return Container(
         padding: _padding,
         decoration: _itemDecoration(color),
@@ -321,7 +326,8 @@ class ExpirationInput extends StatelessWidget {
 }
 
 Widget photoSlot(BuildContext context, File imgFile, setImageFile(File f),
-    BorderRadius containerRadius, BorderRadius imgRadius) {
+    BorderRadius containerRadius, BorderRadius imgRadius,
+    {@required Color borderColor}) {
   if (imgFile != null) {
     Image img = Image.file(imgFile);
     return GestureDetector(
@@ -334,7 +340,7 @@ Widget photoSlot(BuildContext context, File imgFile, setImageFile(File f),
         child: Container(
             decoration: BoxDecoration(
                 borderRadius: containerRadius,
-                border: Border.all(color: Colors.white, width: 8)),
+                border: Border.all(color: borderColor, width: 8)),
             child: ClipRRect(borderRadius: imgRadius, child: img)));
   } else {
     return PhotoButton(

@@ -12,7 +12,7 @@ class ItemColor {
   static const red = Color(0xffEF6F6C);
   static const periwinkle = Color(0xFF92AAFF);
   static const blue = Color(0xff3EC6FF);
-
+  static const hintText = Color.fromRGBO(142, 142, 147, 1);
   static Color getFontColor(Color c) {
     if (c == ItemColor.orange || c == ItemColor.red) {
       return Colors.white;
@@ -36,6 +36,7 @@ class ItemColorDark {
   static const buttonSecondaryOnDarkGrey = Color(0xffD96663);
 //  static const buttonSecondaryOnDarkGrey = Color(0xffE18583);
   static const fontColorGrey = Color(0xffcccccc);
+  static const hintText = Color.fromRGBO(165, 165, 165, 1);
   static const white = Colors.white;
 
   static Color getFontColor(Color c) {
