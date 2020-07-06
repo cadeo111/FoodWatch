@@ -7,6 +7,7 @@ import 'package:FoodWatch/page_template.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 import 'buttons.dart';
 import 'colors.dart';
@@ -19,58 +20,61 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String searchStr = "";
+
   void setSearchStr(String str) => setState(() {
         searchStr = str;
       });
 
   @override
   Widget build(BuildContext context) {
-    final ItemsModel model = ItemsModel.of(context);
-    final List<Item> items =
-        UnmodifiableListView(model.items.where((Item item) {
-      final inDesc = item.desc?.contains(searchStr) ?? false;
-      final inTitle = item.title.contains(searchStr);
-      final inDateStr = DateFormat('EEEE MMMM d yyyy')
-          .format(item.expiration)
-          .contains(searchStr);
-      return inTitle || inDateStr || inDesc;
-    }));
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: PageTemplate(
-        buttons: [
-          OpenContainer(
-              closedColor: (isDarkmode(context))
-                  ? ItemColorDark.buttonOnDarkGrey
-                  : ItemColor.white,
-              openColor: ItemColor.grey,
-              closedElevation: 0,
-              openElevation: 15.0,
-              openShape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(30.0)),
-              ),
-              closedShape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(30.0)),
-              ),
-              transitionType: ContainerTransitionType.fade,
-              transitionDuration: const Duration(milliseconds: 700),
-              openBuilder: (context, action) {
-                return NewItemPage(action);
-              },
-              closedBuilder: (context, action) {
-                return DummyPageButton("New Item");
-              })
-        ],
-        child: Stack(
-          children: <Widget>[
-            _listOfItems(context, items),
-            CustomSearchBar(
-              setSearchStr: setSearchStr,
-            )
+    return ScopedModelDescendant<ItemsModel>(
+        builder: (BuildContext context, Widget child, ItemsModel model) {
+      final List<Item> items =
+          UnmodifiableListView(model.items.where((Item item) {
+        final inDesc = item.desc?.contains(searchStr) ?? false;
+        final inTitle = item.title.contains(searchStr);
+        final inDateStr = DateFormat('EEEE MMMM d yyyy')
+            .format(item.expiration)
+            .contains(searchStr);
+        return inTitle || inDateStr || inDesc;
+      }));
+      return Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: PageTemplate(
+          buttons: [
+            OpenContainer(
+                closedColor: (isDarkmode(context))
+                    ? ItemColorDark.buttonOnDarkGrey
+                    : ItemColor.white,
+                openColor: ItemColor.grey,
+                closedElevation: 0,
+                openElevation: 15.0,
+                openShape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                ),
+                closedShape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                ),
+                transitionType: ContainerTransitionType.fade,
+                transitionDuration: const Duration(milliseconds: 700),
+                openBuilder: (context, action) {
+                  return NewItemPage(action);
+                },
+                closedBuilder: (context, action) {
+                  return DummyPageButton("New Item");
+                })
           ],
+          child: Stack(
+            children: <Widget>[
+              _listOfItems(context, items),
+              CustomSearchBar(
+                setSearchStr: setSearchStr,
+              )
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
