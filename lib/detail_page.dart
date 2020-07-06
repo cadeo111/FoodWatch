@@ -307,80 +307,115 @@ Widget photoSlot(BuildContext context, File imgFile, setImageFile(File f),
 Future<String> _showDescriptionDialog(BuildContext context,
     {String init}) async {
   String str = await showDialog<String>(
-    context: context,
-    builder: (BuildContext context) {
-      final TextEditingController controller =
-          TextEditingController(text: init);
-      Color textColor;
-      Color backgroundColor;
-      Color hintText;
-      if (isDarkmode(context)) {
-        backgroundColor = ItemColorDark.darkGrey;
-        textColor = ItemColorDark.getFontColor(backgroundColor);
-        hintText = ItemColorDark.hintText;
-      } else {
-        backgroundColor = ItemColor.white;
-        ItemColorDark.getFontColor(textColor);
-        hintText = ItemColor.hintText;
-      }
-
-      return BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: SimpleDialog(
-              backgroundColor: backgroundColor,
-              contentPadding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
-              titlePadding: EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(25)),
-              ),
-              title: Text(
-                'Description',
-                style: TextStyle(color: textColor),
-              ),
-              children: <Widget>[
-                TextField(
-                  maxLength: Item.maxDescChars,
-                  controller: controller,
-                  minLines: 2,
-                  maxLines: 8,
-                  cursorColor: ItemColor.blue,
-                  decoration: InputDecoration(
-                    counterStyle: TextStyle(color: textColor),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      borderSide: BorderSide(color: ItemColor.darkGrey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      borderSide: BorderSide(color: ItemColor.blue),
-                    ),
-                    contentPadding: EdgeInsets.all(12),
-                    border: InputBorder.none,
-                    hintText: "eg. Organic Milk from costco, 3 containers",
-                    hintStyle: TextStyle(color: hintText),
-                  ),
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: _fontWeightText,
-                      color: textColor),
-                ),
-                _divider,
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    SmallerButton("Cancel", isRed: true, onPressed: () {
-                      Navigator.pop(context, null);
-                    }),
-                    SmallerButton("Save", onPressed: () {
-                      Navigator.pop(context, controller.text);
-                    }),
-                  ],
-                )
-              ]));
-    },
-  );
+      context: context,
+      builder: (BuildContext context) {
+        return _DescriptionDialogContent(init: init);
+      });
   return str;
+}
+
+class _DescriptionDialogContent extends StatefulWidget {
+  final String init;
+
+  const _DescriptionDialogContent({Key key, this.init}) : super(key: key);
+
+  @override
+  __DescriptionDialogContentState createState() =>
+      __DescriptionDialogContentState(init);
+}
+
+class __DescriptionDialogContentState extends State<_DescriptionDialogContent> {
+  TextEditingController controller;
+  String input;
+
+  @override
+  __DescriptionDialogContentState(String init) {
+    controller = TextEditingController(text: init);
+    input = init;
+    controller.addListener(() {
+      setState(() {
+        input = controller.text;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  Widget build(BuildContext context) {
+    Color textColor;
+    Color backgroundColor;
+    Color hintText;
+    if (isDarkmode(context)) {
+      backgroundColor = ItemColorDark.darkGrey;
+      textColor = ItemColorDark.getFontColor(backgroundColor);
+      hintText = ItemColorDark.hintText;
+    } else {
+      backgroundColor = ItemColor.white;
+      ItemColorDark.getFontColor(textColor);
+      hintText = ItemColor.hintText;
+    }
+    bool saveDisabled =
+        input == widget.init || widget.init == null && input == "";
+
+    return BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: SimpleDialog(
+            backgroundColor: backgroundColor,
+            contentPadding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
+            titlePadding: EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(25)),
+            ),
+            title: Text(
+              'Description',
+              style: TextStyle(color: textColor),
+            ),
+            children: <Widget>[
+              TextField(
+                maxLength: Item.maxDescChars,
+                controller: controller,
+                minLines: 2,
+                maxLines: 8,
+                cursorColor: ItemColor.blue,
+                decoration: InputDecoration(
+                  counterStyle: TextStyle(color: textColor),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: ItemColor.darkGrey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: ItemColor.blue),
+                  ),
+                  contentPadding: EdgeInsets.all(12),
+                  border: InputBorder.none,
+                  hintText: "eg. Organic Milk from costco, 3 containers",
+                  hintStyle: TextStyle(color: hintText),
+                ),
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: _fontWeightText,
+                    color: textColor),
+              ),
+              _divider,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  SmallerButton("Cancel", isRed: true, onPressed: () {
+                    Navigator.pop(context, widget.init);
+                  }),
+                  SmallerButton("Save", disabled: saveDisabled, onPressed: () {
+                    Navigator.pop(context, controller.text);
+                  }),
+                ],
+              )
+            ]));
+  }
 }
 
 class _TitleDialogContent extends StatefulWidget {
@@ -389,16 +424,16 @@ class _TitleDialogContent extends StatefulWidget {
   const _TitleDialogContent({Key key, this.init}) : super(key: key);
 
   @override
-  __TitleDialogContentState createState() => __TitleDialogContentState(init);
+  __TitleDialogContentState createState() => __TitleDialogContentState();
 }
 
 class __TitleDialogContentState extends State<_TitleDialogContent> {
   TextEditingController controller;
   int inputLength;
 
-  __TitleDialogContentState(String init) {
-    controller = TextEditingController(text: init);
-    inputLength = init?.length ?? 0;
+  __TitleDialogContentState() {
+    controller = TextEditingController(text: widget.init);
+    inputLength = widget.init?.length ?? 0;
     controller.addListener(() {
       setState(() {
         inputLength = controller.text.length;
@@ -570,7 +605,7 @@ Future<DateTime> showDateModal(BuildContext context, {DateTime init}) async {
         )),
   );
 
-  return date;
+  return date ?? init ?? placeholderDate;
 }
 
 class PhotoChild extends StatefulWidget {
