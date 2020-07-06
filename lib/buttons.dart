@@ -24,8 +24,11 @@ class NewItemPropButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor = Color(0xff92AAFF);
-    Color textColor = Colors.white;
+    Color bgColor = isDarkmode(context)
+        ? ItemColorDark.buttonOnBlack
+        : ItemColor.periwinkle;
+    Color textColor =
+        isDarkmode(context) ? ItemColorDark.white : ItemColor.white;
 
     return SizedBox(
         child: FlatButton(
@@ -62,16 +65,30 @@ class PageButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor = Colors.white;
-    Color textColor = (isRed) ? Color(0xffFF8F8C) : Color(0xff92AAFF);
-
+    Color bgColor;
+    Color disabledBgColor;
+    Color disabledTextColor;
+    Color textColor;
+    if (isDarkmode(context)) {
+      bgColor = (isRed)
+          ? ItemColorDark.buttonSecondaryOnDarkGrey
+          : ItemColorDark.buttonOnDarkGrey;
+      textColor = Colors.white;
+      disabledTextColor = textColor;
+      disabledBgColor = ItemColorDark.darkDarkGrey;
+    } else {
+      textColor = (isRed) ? Color(0xffFF8F8C) : Color(0xff92AAFF);
+      bgColor = Colors.white;
+      disabledTextColor = ItemColor.darkGrey;
+      disabledBgColor = bgColor;
+    }
     return FlatButton(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(30.0),
       ),
       color: bgColor,
-      disabledColor: bgColor,
-      disabledTextColor: ItemColor.darkGrey,
+      disabledColor: disabledBgColor,
+      disabledTextColor: disabledTextColor,
       textColor: textColor,
       padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
       onPressed: onPressed,
@@ -91,7 +108,9 @@ class PhotoSelectionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor = ItemColor.periwinkle;
+    Color bgColor = isDarkmode(context)
+        ? ItemColorDark.buttonOnDarkGrey
+        : ItemColor.periwinkle;
     Color textColor = Colors.white;
 
     return SizedBox(
@@ -126,15 +145,26 @@ class SmallerOutlinedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor = Colors.white;
-    Color textColor = (isRed) ? Color(0xffFF8F8C) : Color(0xff92AAFF);
+    Color bgColor;
+    Color textColor;
+    Color borderColor;
+    if (isDarkmode(context)) {
+      bgColor = (isRed)
+          ? ItemColorDark.buttonSecondaryOnDarkGrey
+          : ItemColorDark.buttonOnDarkGrey;
+      textColor = ItemColorDark.white;
+      borderColor = bgColor;
+    } else {
+      bgColor = ItemColor.white;
+      textColor = (isRed) ? Color(0xffFF8F8C) : Color(0xff92AAFF);
+      borderColor = (disabled) ? ItemColor.darkGrey : textColor;
+    }
 
     return FlatButton(
       disabledTextColor: ItemColor.darkGrey,
       textColor: textColor,
       shape: RoundedRectangleBorder(
-        side: BorderSide(
-            width: 1.0, color: (disabled) ? ItemColor.darkGrey : textColor),
+        side: BorderSide(width: 1.0, color: borderColor),
         borderRadius: BorderRadius.circular(30.0),
       ),
       color: bgColor,

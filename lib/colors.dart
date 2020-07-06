@@ -24,7 +24,7 @@ class ItemColor {
 
 class ItemColorDark {
   static const black = Color(0xff121212);
-  static const searchGrey = Color(0xff414141);
+  static const darkDarkGrey = Color(0xff414141);
   static const darkGrey = Color(0xff666666);
   static const grey = Color(0xff646464);
   static const yellow = Color(0xffAC8601);
@@ -33,6 +33,8 @@ class ItemColorDark {
   static const blue = Color(0xff3EC6FF);
   static const buttonOnDarkGrey = Color(0xff718DEF);
   static const buttonOnBlack = Color(0xff6C87E4);
+  static const buttonSecondaryOnDarkGrey = Color(0xffD96663);
+//  static const buttonSecondaryOnDarkGrey = Color(0xffE18583);
   static const fontColorGrey = Color(0xffcccccc);
   static const white = Colors.white;
 
@@ -46,8 +48,8 @@ class ItemColorDark {
 
 bool isDarkmode(BuildContext context) {
   var brightness = MediaQuery.of(context).platformBrightness;
-//  return brightness == Brightness.dark;
-  return true;
+  return brightness == Brightness.dark;
+//  return true;
 }
 
 // colors

@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:math';
 
@@ -99,7 +98,6 @@ class Item {
     m['desc'] = desc;
     m['id'] = id;
     m['imgPath'] = img?.path;
-    developer.log(m['imgPath'], name: "path");
     return m;
   }
 

@@ -14,14 +14,15 @@ import 'model/ItemsModel.dart';
 import 'notifications.dart';
 
 const _padding = EdgeInsets.all(16);
-const _itemDecoration = BoxDecoration(
+
+BoxDecoration _itemDecoration(Color color) => BoxDecoration(
     borderRadius: BorderRadius.only(
       topLeft: Radius.circular(25.0),
       topRight: Radius.circular(25.0),
       bottomLeft: Radius.circular(25.0),
       bottomRight: Radius.circular(25.0),
     ),
-    color: ItemColor.white);
+    color: color);
 const _divider = const Divider(
   color: Colors.transparent,
   height: 16,
@@ -97,10 +98,15 @@ class _NewItemPageState extends State<NewItemPage> {
 
   @override
   Widget build(BuildContext context) {
+    final Color textBoxColor = (isDarkmode(context))
+        ? getColorFromDate(_expiration, darkMode: true)
+        : ItemColor.white;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: PageTemplate(
-          color: getColorFromDate(_expiration),
+          color: (isDarkmode(context))
+              ? ItemColorDark.black
+              : getColorFromDate(_expiration),
           buttons: [
             PageButton("Cancel", isRed: true, onPressed: () {
               widget.back();
@@ -117,17 +123,22 @@ class _NewItemPageState extends State<NewItemPage> {
           child: ListView(
             shrinkWrap: false,
             children: <Widget>[
-              TitleInput(onChangeText: (String input) {
-                setTitle(input);
-              }),
+              TitleInput(
+                  color: textBoxColor,
+                  onChangeText: (String input) {
+                    setTitle(input);
+                  }),
               _divider,
-              ExpirationInput(_expiration, onDateChanged: (DateTime dt) {
+              ExpirationInput(_expiration, color: textBoxColor,
+                  onDateChanged: (DateTime dt) {
                 setExpiration(dt);
               }),
               _divider,
-              DescriptionInput(onChangeText: (String input) {
-                setDesc(input);
-              }),
+              DescriptionInput(
+                  color: textBoxColor,
+                  onChangeText: (String input) {
+                    setDesc(input);
+                  }),
               _divider,
               photoSlot(context, _img, (File f) {
                 setState(() {
@@ -144,19 +155,26 @@ class _NewItemPageState extends State<NewItemPage> {
 class TitleInput extends StatelessWidget {
   final void Function(String input) onChangeText;
 
-  TitleInput({this.onChangeText});
+  final Color color;
+
+  TitleInput({@required this.onChangeText, @required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
         padding: _padding,
-        decoration: _itemDecoration,
+        decoration: _itemDecoration(color),
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
                 "Title",
-                style: TextStyle(fontSize: 25, fontWeight: _fontWeightTitles),
+                style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: _fontWeightTitles,
+                    color: (isDarkmode(context))
+                        ? ItemColorDark.getFontColor(color)
+                        : ItemColor.getFontColor(color)),
               ),
               _divider,
               TextField(
@@ -164,6 +182,10 @@ class TitleInput extends StatelessWidget {
                 onChanged: onChangeText,
                 cursorColor: ItemColor.blue,
                 decoration: InputDecoration(
+                  counterStyle: TextStyle(
+                      color: isDarkmode(context)
+                          ? ItemColorDark.getFontColor(color)
+                          : ItemColor.getFontColor(color)),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide: BorderSide(color: ItemColor.darkGrey),
@@ -175,10 +197,17 @@ class TitleInput extends StatelessWidget {
                   contentPadding: EdgeInsets.all(12),
                   border: InputBorder.none,
                   hintText: "eg. Milk",
-                  hintStyle:
-                      const TextStyle(color: Color.fromRGBO(142, 142, 147, 1)),
+                  hintStyle: TextStyle(
+                      color: (isDarkmode(context)
+                          ? Color.fromRGBO(165, 165, 165, 1)
+                          : Color.fromRGBO(142, 142, 147, 1))),
                 ),
-                style: TextStyle(fontSize: 30, fontWeight: _fontWeightText),
+                style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: _fontWeightText,
+                    color: isDarkmode(context)
+                        ? ItemColorDark.getFontColor(color)
+                        : ItemColor.getFontColor(color)),
               )
             ]));
   }
@@ -186,20 +215,29 @@ class TitleInput extends StatelessWidget {
 
 class DescriptionInput extends StatelessWidget {
   final void Function(String input) onChangeText;
+  final Color color;
 
-  DescriptionInput({this.onChangeText});
+  DescriptionInput({@required this.onChangeText, @required this.color});
 
   @override
   Widget build(BuildContext context) {
+    final Color hintColor = (isDarkmode(context)
+        ? Color.fromRGBO(165, 165, 165, 1)
+        : Color.fromRGBO(142, 142, 147, 1));
     return Container(
         padding: _padding,
-        decoration: _itemDecoration,
+        decoration: _itemDecoration(color),
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
                 "Description",
-                style: TextStyle(fontSize: 25, fontWeight: _fontWeightTitles),
+                style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: _fontWeightTitles,
+                    color: isDarkmode(context)
+                        ? ItemColorDark.getFontColor(color)
+                        : ItemColor.getFontColor(color)),
               ),
               _divider,
               TextField(
@@ -209,21 +247,28 @@ class DescriptionInput extends StatelessWidget {
                 maxLines: 8,
                 cursorColor: ItemColor.blue,
                 decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: ItemColor.darkGrey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: ItemColor.blue),
-                  ),
-                  contentPadding: EdgeInsets.all(12),
-                  border: InputBorder.none,
-                  hintText: "eg. Organic Milk from costco, 3 containers",
-                  hintStyle:
-                      const TextStyle(color: Color.fromRGBO(142, 142, 147, 1)),
-                ),
-                style: TextStyle(fontSize: 25, fontWeight: _fontWeightText),
+                    counterStyle: TextStyle(
+                        color: isDarkmode(context)
+                            ? ItemColorDark.getFontColor(color)
+                            : ItemColor.getFontColor(color)),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      borderSide: BorderSide(color: ItemColor.darkGrey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      borderSide: BorderSide(color: ItemColor.blue),
+                    ),
+                    contentPadding: EdgeInsets.all(12),
+                    border: InputBorder.none,
+                    hintText: "eg. Organic Milk from costco, 3 containers",
+                    hintStyle: TextStyle(color: hintColor)),
+                style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: _fontWeightText,
+                    color: isDarkmode(context)
+                        ? ItemColorDark.getFontColor(color)
+                        : ItemColor.getFontColor(color)),
               )
             ]));
   }
@@ -232,8 +277,10 @@ class DescriptionInput extends StatelessWidget {
 class ExpirationInput extends StatelessWidget {
   final DateTime date;
   final void Function(DateTime dt) onDateChanged;
+  final Color color;
 
-  const ExpirationInput(this.date, {Key key, this.onDateChanged})
+  const ExpirationInput(this.date,
+      {Key key, @required this.onDateChanged, @required this.color})
       : super(key: key);
 
   @override
@@ -246,7 +293,7 @@ class ExpirationInput extends StatelessWidget {
         },
         child: Container(
             padding: _padding,
-            decoration: _itemDecoration,
+            decoration: _itemDecoration(color),
             child: Padding(
                 padding: EdgeInsets.only(bottom: 2),
                 child: Column(
@@ -255,12 +302,20 @@ class ExpirationInput extends StatelessWidget {
                       Text(
                         "Expiration",
                         style: TextStyle(
-                            fontSize: 25, fontWeight: _fontWeightTitles),
+                            fontSize: 25,
+                            fontWeight: _fontWeightTitles,
+                            color: isDarkmode(context)
+                                ? ItemColorDark.getFontColor(color)
+                                : ItemColor.getFontColor(color)),
                       ),
                       _divider,
                       Text(DateFormat('MMM d, yyyy').format(date),
                           style: TextStyle(
-                              fontSize: 30, fontWeight: _fontWeightText))
+                              color: isDarkmode(context)
+                                  ? ItemColorDark.getFontColor(color)
+                                  : ItemColor.getFontColor(color),
+                              fontSize: 30,
+                              fontWeight: _fontWeightText))
                     ]))));
   }
 }

@@ -458,9 +458,15 @@ Future<DateTime> showDateModal(BuildContext context, {DateTime init}) async {
               Container(
                 alignment: Alignment.centerRight,
                 decoration: BoxDecoration(
-                  color: const Color.fromRGBO(249, 249, 247, 1.0),
+                  color: isDarkmode(context)
+                      ? ItemColorDark.black
+                      : Color.fromRGBO(249, 249, 247, 1.0),
                   border: Border(
-                    bottom: const BorderSide(width: 0.5, color: Colors.black38),
+                    bottom: BorderSide(
+                        width: 0.5,
+                        color: isDarkmode(context)
+                            ? Colors.white38
+                            : Colors.black38),
                   ),
                 ),
                 child: Row(
@@ -480,14 +486,23 @@ Future<DateTime> showDateModal(BuildContext context, {DateTime init}) async {
                 ),
               ),
               Expanded(
-                  child: CupertinoDatePicker(
-                initialDateTime: start,
-                minimumDate: min,
-                mode: CupertinoDatePickerMode.date,
-                onDateTimeChanged: (DateTime value) {
-                  date = value;
-                },
-                backgroundColor: Colors.white,
+                  child: CupertinoTheme(
+                // Create a unique theme with "ThemeData"
+                data: CupertinoThemeData(
+                    brightness: isDarkmode(context)
+                        ? Brightness.dark
+                        : Brightness.light),
+                child: CupertinoDatePicker(
+                  initialDateTime: start,
+                  minimumDate: min,
+                  mode: CupertinoDatePickerMode.date,
+                  onDateTimeChanged: (DateTime value) {
+                    date = value;
+                  },
+                  backgroundColor: isDarkmode(context)
+                      ? ItemColorDark.black
+                      : ItemColor.white,
+                ),
               )),
             ],
           ),
@@ -597,7 +612,13 @@ class _PhotoChildState extends State<PhotoChild> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(25)),
         ),
-        title: Text(widget.title),
+        title: Text(widget.title,
+            style: TextStyle(
+                color: isDarkmode(context)
+                    ? ItemColorDark.getFontColor(ItemColorDark.darkGrey)
+                    : ItemColor.getFontColor(ItemColor.white))),
+        backgroundColor:
+            isDarkmode(context) ? ItemColorDark.darkGrey : ItemColor.white,
         children: getChildren());
   }
 }

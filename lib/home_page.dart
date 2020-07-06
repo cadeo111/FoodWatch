@@ -85,7 +85,7 @@ class CustomSearchBar extends StatelessWidget {
         ],
         borderRadius: const BorderRadius.all(Radius.circular(50)),
         color:
-            (isDarkmode(context)) ? ItemColorDark.searchGrey : ItemColor.grey,
+            (isDarkmode(context)) ? ItemColorDark.darkDarkGrey : ItemColor.grey,
       ),
       height: 80,
       padding: const EdgeInsets.fromLTRB(24.0, 8.0, 5.0, 5.0),
