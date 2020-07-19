@@ -8,6 +8,8 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
+import '../notifications.dart';
+
 var _uuid = Uuid();
 
 int getNotificationId() {
@@ -179,20 +181,29 @@ class ItemsModel extends Model {
     return UnmodifiableListView(list);
   }
 
-  void add(Item item) {
+  Future<void> add(Item item) async {
     _items[item.id] = item;
+
+    await createNotificationsForItem(item);
+
     item.insertInDB();
     notifyListeners();
   }
 
-  void update(Item updated) {
+  Future<void> update(Item updated) async {
     _items[updated.id] = updated;
+
+    await updateNotificationsForItem(updated);
+
     updated.updateInDb();
     notifyListeners();
   }
 
-  void delete(Item deleted) {
+  Future<void> delete(Item deleted) async {
     _items.remove(deleted.id);
+
+    await deleteNotificationsForItem(deleted);
+
     deleted.deleteInDb();
     notifyListeners();
   }

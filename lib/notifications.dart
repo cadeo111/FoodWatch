@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:intl/intl.dart';
 import 'package:rxdart/subjects.dart';
 
 import 'model/ItemsModel.dart';
@@ -122,7 +121,8 @@ Future<void> scheduleNotification(
   final androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'expirationAlerts',
       'Expiration Alerts',
-      'Lets you know when your food is close to expiring');
+      'Lets you know when your food is close to expiring',
+      priority: Priority.Default);
   final iOSPlatformChannelSpecifics = IOSNotificationDetails();
   final platformChannelSpecifics = NotificationDetails(
       androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
@@ -136,28 +136,6 @@ Future<void> scheduleNotification(
       platformChannelSpecifics);
 }
 
-Future<void> showNotification(
-    {@required id,
-    @required DateTime dateToShow,
-    @required String nameOfItem,
-    @required int daysToExpire}) async {
-  var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'expirationAlerts',
-      'Expiration Alerts',
-      'Lets you know when your food is close to expiring',
-      priority: Priority.Default);
-  var iOSPlatformChannelSpecifics = IOSNotificationDetails();
-  var platformChannelSpecifics = NotificationDetails(
-      androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-  await flutterLocalNotificationsPlugin.show(
-      id,
-      (daysToExpire != 0)
-          ? '$nameOfItem expires in $daysToExpire days'
-          : "$nameOfItem expires today",
-      "dts:${new DateFormat.yMd().add_jm().format(dateToShow)} id:$id",
-      platformChannelSpecifics);
-}
-
 Future<void> createNotificationsForItem(Item i) async {
   final int notifId = i.notificationId;
   final DateTime expiration = i.expiration;
@@ -168,27 +146,54 @@ Future<void> createNotificationsForItem(Item i) async {
 
   final DateTime timeToShow = DateTime(0, 0, 0, 8, 30);
 
+  final DateTime day7Full = DateTime(day7expiration.year, day7expiration.month,
+      day7expiration.day, timeToShow.hour, timeToShow.minute);
+  final DateTime day3Full = DateTime(day3expiration.year, day3expiration.month,
+      day3expiration.day, timeToShow.hour, timeToShow.minute);
+  final DateTime dayOfFull = DateTime(expiration.year, expiration.month,
+      expiration.day, timeToShow.hour, timeToShow.minute);
+
+  final DateTime now = DateTime.now();
+
   //7 day notification
-  await showNotification(
-      id: notifId + 1,
-      dateToShow: DateTime(day7expiration.year, day7expiration.month,
-          day7expiration.day, timeToShow.hour, timeToShow.minute),
-      nameOfItem: name,
-      daysToExpire: 7);
+  if (now.isBefore(day7Full)) {
+    await scheduleNotification(
+        id: notifId + 1,
+        dateToShow: day7Full,
+        nameOfItem: name,
+        daysToExpire: 7);
+  }
 
   //3 day notification
-  await showNotification(
-      id: notifId + 2,
-      dateToShow: DateTime(day3expiration.year, day3expiration.month,
-          day3expiration.day, timeToShow.hour, timeToShow.minute),
-      nameOfItem: name,
-      daysToExpire: 3);
+  if (now.isBefore(day3Full)) {
+    await scheduleNotification(
+        id: notifId + 2,
+        dateToShow: day3Full,
+        nameOfItem: name,
+        daysToExpire: 3);
+  }
 
   //day of expiration notification
-  await showNotification(
-      id: notifId + 3,
-      dateToShow: DateTime(expiration.year, expiration.month, expiration.day,
-          timeToShow.hour, timeToShow.minute),
-      nameOfItem: name,
-      daysToExpire: 0);
+  if (now.isBefore(dayOfFull)) {
+    await scheduleNotification(
+        id: notifId + 3,
+        dateToShow: dayOfFull,
+        nameOfItem: name,
+        daysToExpire: 0);
+  }
+}
+
+Future<void> deleteNotificationsForItem(Item i) async {
+  final int notifId = i.notificationId;
+  // cancel 7 day notification
+  await flutterLocalNotificationsPlugin.cancel(notifId + 1);
+  // cancel 3 day notification
+  await flutterLocalNotificationsPlugin.cancel(notifId + 2);
+  // cancel day of notification
+  await flutterLocalNotificationsPlugin.cancel(notifId + 3);
+}
+
+Future<void> updateNotificationsForItem(Item i) async {
+  await deleteNotificationsForItem(i);
+  await createNotificationsForItem(i);
 }

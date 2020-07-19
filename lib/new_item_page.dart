@@ -11,7 +11,6 @@ import 'buttons.dart';
 import 'colors.dart';
 import 'detail_page.dart';
 import 'model/ItemsModel.dart';
-import 'notifications.dart';
 
 const _padding = EdgeInsets.all(16);
 
@@ -92,8 +91,7 @@ class _NewItemPageState extends State<NewItemPage> {
         expiration: _expiration,
         desc: _desc,
         img: savedImageFile);
-    await createNotificationsForItem(item);
-    ItemsModel.of(context).add(item);
+    await ItemsModel.of(context).add(item);
   }
 
   @override
