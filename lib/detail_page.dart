@@ -188,12 +188,16 @@ class _DetailPageState extends State<DetailPage> {
       textBoxTextColor = ItemColor.getFontColor(textBoxBackgroundColor);
     }
 
+    final padding =
+        Platform.isAndroid ? EdgeInsets.symmetric(vertical: 16) : null;
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: PageTemplate(
         color: pageColor,
         buttons: _getButtons(),
         child: ListView(
+          padding: padding,
           shrinkWrap: false,
           children: <Widget>[
             GestureDetector(

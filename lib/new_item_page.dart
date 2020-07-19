@@ -101,6 +101,9 @@ class _NewItemPageState extends State<NewItemPage> {
     final Color textBoxColor = (isDarkmode(context))
         ? getColorFromDate(_expiration, darkMode: true)
         : ItemColor.white;
+    final padding =
+        Platform.isAndroid ? EdgeInsets.symmetric(vertical: 16) : null;
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: PageTemplate(
@@ -122,6 +125,7 @@ class _NewItemPageState extends State<NewItemPage> {
           ],
           child: ListView(
             shrinkWrap: false,
+            padding: padding,
             children: <Widget>[
               TitleInput(
                   color: textBoxColor,

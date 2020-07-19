@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:FoodWatch/detail_page.dart';
 import 'package:FoodWatch/model/ItemsModel.dart';
@@ -56,7 +57,7 @@ class _HomePageState extends State<HomePage> {
                   borderRadius: BorderRadius.all(Radius.circular(30.0)),
                 ),
                 transitionType: ContainerTransitionType.fade,
-                transitionDuration: const Duration(milliseconds: 700),
+                transitionDuration: const Duration(milliseconds: 400),
                 openBuilder: (context, action) {
                   return NewItemPage(action);
                 },
@@ -79,8 +80,11 @@ class _HomePageState extends State<HomePage> {
 }
 
 ListView _listOfItems(BuildContext context, UnmodifiableListView<Item> items) {
+  final padding = Platform.isAndroid
+      ? EdgeInsets.only(top: 108, bottom: 16)
+      : EdgeInsets.only(top: 100);
   return ListView.separated(
-    padding: EdgeInsets.only(top: 100),
+    padding: padding,
     itemCount: items.length,
     itemBuilder: (BuildContext context, int index) {
       Item item = items[index];
@@ -129,6 +133,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final margin = Platform.isAndroid ? EdgeInsets.only(top: 12) : null;
     return Container(
       decoration: BoxDecoration(
         boxShadow: [
@@ -143,6 +148,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
         color:
             (isDarkmode(context)) ? ItemColorDark.darkDarkGrey : ItemColor.grey,
       ),
+      margin: margin,
       height: 80,
       padding: const EdgeInsets.fromLTRB(24.0, 8.0, 5.0, 5.0),
       alignment: Alignment.center,

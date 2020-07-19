@@ -10,12 +10,13 @@ class PageTemplate extends StatelessWidget {
   const PageTemplate(
       {Key key, @required this.buttons, @required this.child, this.color})
       : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     final Color defaultColor =
         (isDarkmode(context)) ? ItemColorDark.black : ItemColor.white;
     final Color realColor = color ?? defaultColor;
+    final EdgeInsets padding = EdgeInsets.symmetric(horizontal: 24);
+
     return Container(
         height: double.infinity,
         color: (isDarkmode(context))
@@ -27,7 +28,7 @@ class PageTemplate extends StatelessWidget {
                 flex: 5,
                 child: Container(
                   child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24),
+                      padding: padding,
                       child: SafeArea(bottom: false, child: child)),
                   decoration: BoxDecoration(
                       boxShadow: [
