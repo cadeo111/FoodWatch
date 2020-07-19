@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart';
 import 'package:rxdart/subjects.dart';
 
 import 'model/ItemsModel.dart';
@@ -115,9 +118,7 @@ Future<void> scheduleNotification(
     @required DateTime dateToShow,
     @required String nameOfItem,
     @required int daysToExpire}) async {
-  final DateTime now = dateToShow;
-  final scheduledNotificationDateTime =
-      DateTime(now.year, now.month, now.day, 9);
+  final scheduledNotificationDateTime = dateToShow;
   final androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'expirationAlerts',
       'Expiration Alerts',
@@ -134,6 +135,7 @@ Future<void> scheduleNotification(
       null,
       scheduledNotificationDateTime,
       platformChannelSpecifics);
+  log("created notification for date ${new DateFormat.yMd().add_jm().format(scheduledNotificationDateTime)}");
 }
 
 Future<void> createNotificationsForItem(Item i) async {
